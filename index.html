@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>QRコードリーダー</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- QRコードライブラリの読み込み -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    #reader {
+      width: 300px;
+      margin: auto;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📷 QRコードリーダー</h1>
+  <div id="reader"></div>
+  <div id="result">🔍 QRコードをかざしてください</div>
+
+  <script>
+    function onScanSuccess(decodedText, decodedResult) {
+      document.getElementById('result').innerText = "✅ 読み取り成功！内容: " + decodedText;
+      html5QrcodeScanner.clear(); // 1回読んだら止める（何度も読ませたいときは消してOK）
+    }
+
+    const html5QrcodeScanner = new Html5QrcodeScanner(
+      "reader",
+      {
+        fps: 10,
+        qrbox: 250
+      });
+
+    html5QrcodeScanner.render(onScanSuccess);
+  </script>
+
+</body>
+</html>
