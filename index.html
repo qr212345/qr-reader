@@ -11,28 +11,29 @@
   <div id="reader"></div>
   <div id="result">ここに読み取った内容が出ます</div>
 
-  <script>
-    // ✅ QRコード読み取り後の処理
-    function onScanSuccess(decodedText, decodedResult) {
-      // ✅ 読み取った内容がURLだったらジャンプ！
-      if (decodedText.startsWith("http://") || decodedText.startsWith("https://")) {
-        window.location.href = decodedText; // ← ここでジャンプ！
-      } else {
-        // URLじゃない場合は画面に表示
-        document.getElementById('result').innerText = "読み取り成功: " + decodedText;
-      }
+<script>
+  // QRコード読み取りに成功したときの処理
+  function onScanSuccess(decodedText, decodedResult) {
+    console.log("読み取り成功！内容:", decodedText);
 
-      html5QrcodeScanner.clear(); // 一度読んだらスキャン停止
+    // ✅ ここがジャンプ処理！★この中に書くよ！
+    if (decodedText.startsWith("http://") || decodedText.startsWith("https://")) {
+      window.location.href = decodedText;
+      setTimeout(() => html5QrcodeScanner.clear(), 500); // ← ここがジャンプ後の停止処理
+    } else {
+      document.getElementById('result').innerText = "読み取り成功: " + decodedText;
+      html5QrcodeScanner.clear(); // ← URLでないときはすぐ止める
     }
+  }
 
-    // ✅ QRコード読み取り機能の設定
-    const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
-      fps: 10,
-      qrbox: 250
-    });
+  // QRコードスキャナーの初期化と実行
+  const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
+    fps: 10,
+    qrbox: 250
+  });
+  html5QrcodeScanner.render(onScanSuccess);
+</script>
 
-    html5QrcodeScanner.render(onScanSuccess); // 実行
-  </script>
 
 </body>
 </html>
