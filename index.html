@@ -3,48 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <title>QRコードリーダー</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- QRコードライブラリの読み込み -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 20px;
-    }
-    #reader {
-      width: 300px;
-      margin: auto;
-    }
-    #result {
-      margin-top: 20px;
-      font-size: 18px;
-      color: green;
-    }
-  </style>
 </head>
 <body>
 
-  <h1>📷 QRコードリーダー</h1>
+  <h1>QRコードリーダー</h1>
   <div id="reader"></div>
-  <div id="result">🔍 QRコードをかざしてください</div>
+  <div id="result">ここに読み取った内容が出ます</div>
 
   <script>
+    // ✅ QRコード読み取り後の処理
     function onScanSuccess(decodedText, decodedResult) {
-      document.getElementById('result').innerText = "✅ 読み取り成功！内容: " + decodedText;
-      html5QrcodeScanner.clear(); // 1回読んだら止める（何度も読ませたいときは消してOK）
+      // ✅ 読み取った内容がURLだったらジャンプ！
+      if (decodedText.startsWith("http://") || decodedText.startsWith("https://")) {
+        window.location.href = decodedText; // ← ここでジャンプ！
+      } else {
+        // URLじゃない場合は画面に表示
+        document.getElementById('result').innerText = "読み取り成功: " + decodedText;
+      }
+
+      html5QrcodeScanner.clear(); // 一度読んだらスキャン停止
     }
 
-    const html5QrcodeScanner = new Html5QrcodeScanner(
-      "reader",
-      {
-        fps: 10,
-        qrbox: 250
-      });
+    // ✅ QRコード読み取り機能の設定
+    const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
+      fps: 10,
+      qrbox: 250
+    });
 
-    html5QrcodeScanner.render(onScanSuccess);
+    html5QrcodeScanner.render(onScanSuccess); // 実行
   </script>
 
 </body>
 </html>
+
