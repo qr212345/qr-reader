@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>わらび餅専門店 わらび庵</title>
   <title>QRコードリーダー</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
@@ -12,6 +11,14 @@
   <h1>QRコードリーダー</h1>
   <div id="reader"></div>
   <div id="result">ここに読み取った内容が出ます</div>
+  <style>
+  #reader {
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 4 / 3; /* ← ここで縦横比を指定 */
+    margin: auto;
+  }
+</style>
 
 <script>
   // QRコード読み取りに成功したときの処理
