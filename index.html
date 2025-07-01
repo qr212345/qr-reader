@@ -25,14 +25,13 @@
       position: relative;
     }
 
+    /* オーバーレイ：読み取り中表示（#reader内に移動済み） */
     #scannerOverlay {
       position: absolute;
       top: 0;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 0;
       width: 100%;
-      max-width: 400px;
-      aspect-ratio: 4 / 3;
+      height: 100%;
       background-color: rgba(0, 0, 0, 0.4);
       color: white;
       font-size: 1.5rem;
@@ -94,8 +93,10 @@
   <h1>QRコードリーダー</h1>
   <p>座席 → 生徒（最大6人）を読み取り、「完了」「Undo」も可能です</p>
 
-  <div id="reader"></div>
-  <div id="scannerOverlay">読み取り中...</div>
+  <div id="reader">
+    <div id="scannerOverlay">読み取り中...</div>
+  </div>
+
   <button id="toggleCameraBtn" onclick="toggleCamera()">📷 カメラを停止</button>
 
   <div id="result">ここに読み取った内容が出ます</div>
@@ -114,8 +115,8 @@
 
   <script>
     let currentSeat = null;
-    const seatMap = {}; // 座席ID → 生徒IDの配列
-    let lastAction = null; // Undo用記録
+    const seatMap = {};
+    let lastAction = null;
     let scannerRunning = true;
 
     function updateTable() {
