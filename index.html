@@ -172,6 +172,21 @@
       qrbox: { width: 250, height: 250 }
     });
     html5QrcodeScanner.render(onScanSuccess);
+    function uploadToDrive(csv) {
+  fetch("https://script.google.com/a/macros/gm.ibaraki-ct.ac.jp/s/AKfycbzWL6LcHpG6YtaARcJWIYarv5KVZqtOVfwtHhakUHroXE6g9jIr6aYpdyH5LkD1q4s/exec", {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: csv
+  })
+  .then(response => response.text())
+  .then(text => {
+    alert("Google Driveに保存: " + text);
+  })
+  .catch(err => {
+    console.error("エラー:", err);
+    alert("保存失敗: " + err.message);
+  });
+}
   </script>
 
 </body>
