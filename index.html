@@ -22,27 +22,6 @@
       border-radius: 12px;
       background-color: #f9f9f9;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      position: relative;
-    }
-
-    /* 読み取り中オーバーレイ */
-    #scannerOverlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.4);
-      color: white;
-      font-size: 1.5rem;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2;
-      pointer-events: none;
-      border-radius: 12px;
-      display: none;
     }
 
     table {
@@ -74,11 +53,7 @@
   <h1>QRコードリーダー</h1>
   <p>座席 → 生徒（最大6人）を読み取り、「完了」「Undo」も可能です</p>
 
-  <div id="reader">
-    <div id="scannerOverlay">読み取り中...</div>
-  </div>
-
-  <button id="toggleCameraBtn" onclick="toggleCamera()">📷 カメラを停止</button>
+  <div id="reader"></div>
 
   <div id="result">ここに読み取った内容が出ます</div>
 
@@ -98,7 +73,6 @@
     let currentSeat = null;
     const seatMap = {};
     let lastAction = null;
-    let scannerRunning = true;
 
     function updateTable() {
       const tbody = document.querySelector('#seatTable tbody');
@@ -192,31 +166,12 @@
       URL.revokeObjectURL(url);
     }
 
-    // ✅ ここで qrbox を指定（四角いスキャン範囲を表示）
+    // ✅ 四角い読み取り枠を表示
     const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
       fps: 15,
-      qrbox: { width: 250, height: 250 } // 🔲 ← ここが四角い枠！
+      qrbox: { width: 250, height: 250 }
     });
     html5QrcodeScanner.render(onScanSuccess);
-
-    function toggleCamera() {
-      if (scannerRunning) {
-        html5QrcodeScanner.clear().then(() => {
-          document.getElementById("toggleCameraBtn").innerText = "📷 カメラを開始";
-          document.getElementById("scannerOverlay").style.display = "none";
-          scannerRunning = false;
-        });
-      } else {
-        html5QrcodeScanner.render(onScanSuccess);
-        document.getElementById("toggleCameraBtn").innerText = "📷 カメラを停止";
-        document.getElementById("scannerOverlay").style.display = "flex";
-        scannerRunning = true;
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("scannerOverlay").style.display = "flex";
-    });
   </script>
 
 </body>
