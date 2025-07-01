@@ -11,7 +11,6 @@
       text-align: center;
       margin: 2rem;
     }
-
     #reader {
       width: 100%;
       max-width: 400px;
@@ -23,26 +22,22 @@
       background-color: #f9f9f9;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-
     table {
       margin: 1rem auto;
       border-collapse: collapse;
       width: 90%;
       max-width: 500px;
     }
-
     th, td {
       border: 1px solid #aaa;
       padding: 8px;
     }
-
     button {
       margin-top: 1rem;
       margin-right: 0.5rem;
       padding: 0.5rem 1rem;
       font-size: 1rem;
     }
-
     #completeSeatBtn {
       display: none;
     }
@@ -110,11 +105,8 @@
     }
 
     function onScanSuccess(decodedText, decodedResult) {
-      console.log("読み取り成功:", decodedText);
-
       if (decodedText.startsWith("http://") || decodedText.startsWith("https://")) {
         window.location.href = decodedText;
-        setTimeout(() => html5QrcodeScanner.clear(), 500);
         return;
       }
 
@@ -155,6 +147,7 @@
         });
       }
 
+      // ローカル保存
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -164,38 +157,34 @@
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+
+      // GASに送信
+      uploadToDrive(csv);
     }
 
-    // ✅ QRコードリーダー起動（スキャン範囲を250x250に設定）
+    function uploadToDrive(csv) {
+      fetch("1FpYtuY2Xsmq5X3lbbjsUV5pPm4XApZBr", {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: csv
+      })
+      .then(response => response.text())
+      .then(text => {
+        alert("Google Driveに保存: " + text);
+      })
+      .catch(err => {
+        console.error("エラー:", err);
+        alert("保存失敗: " + err.message);
+      });
+    }
+
     const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
       fps: 15,
       qrbox: { width: 250, height: 250 }
     });
     html5QrcodeScanner.render(onScanSuccess);
-  function downloadCSV() {
-  let csv = "座席ID,生徒ID\n";
-  for (const [seat, people] of Object.entries(seatMap)) {
-    people.forEach(person => {
-      csv += `${seat},${person}\n`;
-    });
-  }
-
-  // ローカル保存
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "seat_assignment.csv";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-
-  // ✅ GASにも送信
-  uploadToDrive(csv);
-}
-
   </script>
 
 </body>
 </html>
+
