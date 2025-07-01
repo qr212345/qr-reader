@@ -11,28 +11,79 @@
       text-align: center;
       margin: 2rem;
     }
+
     #reader {
       width: 100%;
       max-width: 400px;
       aspect-ratio: 4 / 3;
-      margin: auto;
+      margin: 0 auto 1rem;
+      padding: 10px;
+      border: 2px solid #888;
+      border-radius: 12px;
+      background-color: #f9f9f9;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      position: relative;
     }
+
+    #scannerOverlay {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 400px;
+      aspect-ratio: 4 / 3;
+      background-color: rgba(0, 0, 0, 0.4);
+      color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      pointer-events: none;
+      border-radius: 12px;
+      display: none;
+    }
+
+    #reader::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 2px;
+      width: 100%;
+      background: red;
+      animation: scanLine 2s linear infinite;
+      z-index: 3;
+      border-radius: 2px;
+    }
+
+    @keyframes scanLine {
+      0% { top: 0%; }
+      50% { top: 95%; }
+      100% { top: 0%; }
+    }
+
     table {
       margin: 1rem auto;
       border-collapse: collapse;
       width: 90%;
       max-width: 500px;
     }
+
     th, td {
       border: 1px solid #aaa;
       padding: 8px;
     }
+
     button {
       margin-top: 1rem;
       margin-right: 0.5rem;
       padding: 0.5rem 1rem;
       font-size: 1rem;
     }
+
     #completeSeatBtn {
       display: none;
     }
@@ -44,6 +95,9 @@
   <p>座席 → 生徒（最大6人）を読み取り、「完了」「Undo」も可能です</p>
 
   <div id="reader"></div>
+  <div id="scannerOverlay">読み取り中...</div>
+  <button id="toggleCameraBtn" onclick="toggleCamera()">📷 カメラを停止</button>
+
   <div id="result">ここに読み取った内容が出ます</div>
 
   <h2>現在の座席配置</h2>
@@ -62,6 +116,7 @@
     let currentSeat = null;
     const seatMap = {}; // 座席ID → 生徒IDの配列
     let lastAction = null; // Undo用記録
+    let scannerRunning = true;
 
     function updateTable() {
       const tbody = document.querySelector('#seatTable tbody');
@@ -121,7 +176,7 @@
           completeCurrentSeat();
         } else {
           people.push(decodedText);
-          lastAction = { seat: currentSeat, person: decodedText }; // Undo記録
+          lastAction = { seat: currentSeat, person: decodedText };
           document.getElementById('result').innerText = `「${decodedText}」を座席「${currentSeat}」に追加しました（${people.length}/6）。`;
           if (people.length >= 6) {
             document.getElementById('result').innerText += ` 登録上限に達しました。次の座席を読み取ってください。`;
@@ -156,10 +211,29 @@
     }
 
     const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
-      fps: 15, // 読み取り速度アップ
-      qrbox: { width: 300, height: 300 } // 認識エリア拡大
+      fps: 15,
+      qrbox: { width: 300, height: 300 }
     });
     html5QrcodeScanner.render(onScanSuccess);
+
+    function toggleCamera() {
+      if (scannerRunning) {
+        html5QrcodeScanner.clear().then(() => {
+          document.getElementById("toggleCameraBtn").innerText = "📷 カメラを開始";
+          document.getElementById("scannerOverlay").style.display = "none";
+          scannerRunning = false;
+        });
+      } else {
+        html5QrcodeScanner.render(onScanSuccess);
+        document.getElementById("toggleCameraBtn").innerText = "📷 カメラを停止";
+        document.getElementById("scannerOverlay").style.display = "flex";
+        scannerRunning = true;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("scannerOverlay").style.display = "flex";
+    });
   </script>
 
 </body>
