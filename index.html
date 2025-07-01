@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QRコードリーダー＋CSV＋Undo</title>
+  <title>QRコードリーダー＋CSV＋Undo＋読み取り強化</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     body {
@@ -56,12 +56,12 @@
 
   <button onclick="downloadCSV()">CSVとして保存</button>
   <button id="completeSeatBtn" onclick="completeCurrentSeat()">この座席の登録を完了する</button>
-  <button onclick="undoLast()">最後の追加を取り消す</button> <!-- Undoボタン追加 -->
+  <button onclick="undoLast()">最後の追加を取り消す</button>
 
   <script>
     let currentSeat = null;
-    let seatMap = {}; // 座席ID → 生徒IDの配列
-    let lastAction = null; // 最後の追加操作を記録
+    const seatMap = {}; // 座席ID → 生徒IDの配列
+    let lastAction = null; // Undo用記録
 
     function updateTable() {
       const tbody = document.querySelector('#seatTable tbody');
@@ -85,8 +85,8 @@
       if (lastAction) {
         const { seat, person } = lastAction;
         const people = seatMap[seat];
-        if (people && people.length > 0 && people[people.length - 1] === person) {
-          people.pop(); // 最後の1人を削除
+        if (people && people[people.length - 1] === person) {
+          people.pop();
           document.getElementById('result').innerText = `「${person}」の登録を取り消しました。`;
           updateTable();
           lastAction = null;
@@ -112,7 +112,7 @@
         if (!seatMap[currentSeat]) {
           seatMap[currentSeat] = [];
         }
-        document.getElementById('result').innerText = `座席ID「${currentSeat}」を読み取りました。次に最大6人まで生徒IDをスキャンしてください。`;
+        document.getElementById('result').innerText = `座席ID「${currentSeat}」を読み取りました。最大6人まで登録できます。`;
         document.getElementById('completeSeatBtn').style.display = 'inline-block';
       } else {
         const people = seatMap[currentSeat];
@@ -121,7 +121,7 @@
           completeCurrentSeat();
         } else {
           people.push(decodedText);
-          lastAction = { seat: currentSeat, person: decodedText }; // Undo用に記録
+          lastAction = { seat: currentSeat, person: decodedText }; // Undo記録
           document.getElementById('result').innerText = `「${decodedText}」を座席「${currentSeat}」に追加しました（${people.length}/6）。`;
           if (people.length >= 6) {
             document.getElementById('result').innerText += ` 登録上限に達しました。次の座席を読み取ってください。`;
@@ -156,13 +156,11 @@
     }
 
     const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
-      fps: 10,
-      qrbox: 250
+      fps: 15, // 読み取り速度アップ
+      qrbox: { width: 300, height: 300 } // 認識エリア拡大
     });
     html5QrcodeScanner.render(onScanSuccess);
   </script>
 
 </body>
 </html>
-
-
