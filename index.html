@@ -69,6 +69,9 @@
     const seatMap = {};
     let lastAction = null;
 
+    let lastScannedText = "";
+    let lastScannedTime = 0;
+
     function updateTable() {
       const tbody = document.querySelector('#seatTable tbody');
       tbody.innerHTML = '';
@@ -105,19 +108,35 @@
     }
 
     function onScanSuccess(decodedText, decodedResult) {
+      const now = Date.now();
+
+      if (decodedText === lastScannedText && now - lastScannedTime < 1000) {
+        return; // 同じ内容を1秒以内にスキャンしたら無視
+      }
+      lastScannedText = decodedText;
+      lastScannedTime = now;
+
       if (decodedText.startsWith("http://") || decodedText.startsWith("https://")) {
         window.location.href = decodedText;
         return;
       }
 
-      if (!currentSeat) {
+      if (decodedText.startsWith("table")) {
+        // 座席QRコード
         currentSeat = decodedText;
         if (!seatMap[currentSeat]) {
           seatMap[currentSeat] = [];
         }
         document.getElementById('result').innerText = `座席ID「${currentSeat}」を読み取りました。最大6人まで登録できます。`;
         document.getElementById('completeSeatBtn').style.display = 'inline-block';
-      } else {
+      }
+      else if (decodedText.startsWith("player")) {
+        // 生徒QRコード
+        if (!currentSeat) {
+          document.getElementById('result').innerText = "先に座席のQRコード（table～）を読み取ってください。";
+          return;
+        }
+
         const people = seatMap[currentSeat];
         if (people.length >= 6) {
           document.getElementById('result').innerText = `座席「${currentSeat}」はすでに6人登録済みです。`;
@@ -132,6 +151,9 @@
           }
           updateTable();
         }
+      }
+      else {
+        document.getElementById('result').innerText = "無効なQRコードです（table〜 または player〜 で始めてください）。";
       }
 
       html5QrcodeScanner.clear().then(() => {
@@ -158,12 +180,12 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      // GASに送信
+      // GASに送信（URLは自分のGASのWeb App URLに置き換える）
       uploadToDrive(csv);
     }
 
     function uploadToDrive(csv) {
-      fetch("https://script.google.com/a/macros/gm.ibaraki-ct.ac.jp/s/AKfycbzWL6LcHpG6YtaARcJWIYarv5KVZqtOVfwtHhakUHroXE6g9jIr6aYpdyH5LkD1q4s/exec", {
+      fetch("https://script.google.com/macros/s/___ここに自分のGAS公開URL___/exec", {
         method: "POST",
         headers: { "Content-Type": "text/plain" },
         body: csv
@@ -187,4 +209,3 @@
 
 </body>
 </html>
-
