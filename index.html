@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QRコードリーダー＋CSV</title>
+  <title>QRコードリーダー＋CSV＋Undo</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     body {
@@ -29,15 +29,19 @@
     }
     button {
       margin-top: 1rem;
+      margin-right: 0.5rem;
       padding: 0.5rem 1rem;
       font-size: 1rem;
+    }
+    #completeSeatBtn {
+      display: none;
     }
   </style>
 </head>
 <body>
 
   <h1>QRコードリーダー</h1>
-  <p>人 → 座席 の順でQRコードを読み取ってください</p>
+  <p>座席 → 生徒（最大6人）を読み取り、「完了」「Undo」も可能です</p>
 
   <div id="reader"></div>
   <div id="result">ここに読み取った内容が出ます</div>
@@ -45,24 +49,52 @@
   <h2>現在の座席配置</h2>
   <table id="seatTable">
     <thead>
-      <tr><th>座席ID</th><th>人ID</th></tr>
+      <tr><th>座席ID</th><th>登録された生徒ID</th></tr>
     </thead>
     <tbody></tbody>
   </table>
 
   <button onclick="downloadCSV()">CSVとして保存</button>
+  <button id="completeSeatBtn" onclick="completeCurrentSeat()">この座席の登録を完了する</button>
+  <button onclick="undoLast()">最後の追加を取り消す</button> <!-- Undoボタン追加 -->
 
   <script>
-    let currentPerson = null;
-    const seatMap = {}; // 座席ID → 人ID
+    let currentSeat = null;
+    let seatMap = {}; // 座席ID → 生徒IDの配列
+    let lastAction = null; // 最後の追加操作を記録
 
     function updateTable() {
       const tbody = document.querySelector('#seatTable tbody');
       tbody.innerHTML = '';
-      for (const [seat, person] of Object.entries(seatMap)) {
+      for (const [seat, people] of Object.entries(seatMap)) {
         const row = document.createElement('tr');
-        row.innerHTML = `<td>${seat}</td><td>${person}</td>`;
+        row.innerHTML = `<td>${seat}</td><td>${people.join(', ')}</td>`;
         tbody.appendChild(row);
+      }
+    }
+
+    function completeCurrentSeat() {
+      if (currentSeat !== null) {
+        document.getElementById('result').innerText = `座席「${currentSeat}」の登録を完了しました。次の座席QRコードを読み取ってください。`;
+        currentSeat = null;
+        document.getElementById('completeSeatBtn').style.display = 'none';
+      }
+    }
+
+    function undoLast() {
+      if (lastAction) {
+        const { seat, person } = lastAction;
+        const people = seatMap[seat];
+        if (people && people.length > 0 && people[people.length - 1] === person) {
+          people.pop(); // 最後の1人を削除
+          document.getElementById('result').innerText = `「${person}」の登録を取り消しました。`;
+          updateTable();
+          lastAction = null;
+        } else {
+          document.getElementById('result').innerText = "Undoできません。直前の状態ではありません。";
+        }
+      } else {
+        document.getElementById('result').innerText = "Undoする操作がありません。";
       }
     }
 
@@ -75,15 +107,28 @@
         return;
       }
 
-      if (!currentPerson) {
-        currentPerson = decodedText;
-        document.getElementById('result').innerText = `人ID「${decodedText}」を読み取りました。次に座席のQRコードをスキャンしてください。`;
+      if (!currentSeat) {
+        currentSeat = decodedText;
+        if (!seatMap[currentSeat]) {
+          seatMap[currentSeat] = [];
+        }
+        document.getElementById('result').innerText = `座席ID「${currentSeat}」を読み取りました。次に最大6人まで生徒IDをスキャンしてください。`;
+        document.getElementById('completeSeatBtn').style.display = 'inline-block';
       } else {
-        const seatID = decodedText;
-        seatMap[seatID] = currentPerson;
-        document.getElementById('result').innerText = `座席「${seatID}」に「${currentPerson}」を割り当てました。`;
-        currentPerson = null;
-        updateTable();
+        const people = seatMap[currentSeat];
+        if (people.length >= 6) {
+          document.getElementById('result').innerText = `座席「${currentSeat}」はすでに6人登録済みです。次の座席を読み取ってください。`;
+          completeCurrentSeat();
+        } else {
+          people.push(decodedText);
+          lastAction = { seat: currentSeat, person: decodedText }; // Undo用に記録
+          document.getElementById('result').innerText = `「${decodedText}」を座席「${currentSeat}」に追加しました（${people.length}/6）。`;
+          if (people.length >= 6) {
+            document.getElementById('result').innerText += ` 登録上限に達しました。次の座席を読み取ってください。`;
+            completeCurrentSeat();
+          }
+          updateTable();
+        }
       }
 
       html5QrcodeScanner.clear().then(() => {
@@ -92,9 +137,11 @@
     }
 
     function downloadCSV() {
-      let csv = "座席ID,人ID\n";
-      for (const [seat, person] of Object.entries(seatMap)) {
-        csv += `${seat},${person}\n`;
+      let csv = "座席ID,生徒ID\n";
+      for (const [seat, people] of Object.entries(seatMap)) {
+        people.forEach(person => {
+          csv += `${seat},${person}\n`;
+        });
       }
 
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -117,4 +164,5 @@
 
 </body>
 </html>
+
 
