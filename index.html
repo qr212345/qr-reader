@@ -2,47 +2,118 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QRコードリーダー</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QRコードリーダー＋CSV</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin: 2rem;
+    }
+    #reader {
+      width: 100%;
+      max-width: 400px;
+      aspect-ratio: 4 / 3;
+      margin: auto;
+    }
+    table {
+      margin: 1rem auto;
+      border-collapse: collapse;
+      width: 90%;
+      max-width: 500px;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 8px;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+    }
+  </style>
 </head>
 <body>
 
   <h1>QRコードリーダー</h1>
+  <p>人 → 座席 の順でQRコードを読み取ってください</p>
+
   <div id="reader"></div>
   <div id="result">ここに読み取った内容が出ます</div>
-  <style>
-  #reader {
-    width: 100%;
-    max-width: 400px;
-    aspect-ratio: 4 / 3; /* ← ここで縦横比を指定 */
-    margin: auto;
-  }
-</style>
 
-<script>
-  // QRコード読み取りに成功したときの処理
-  function onScanSuccess(decodedText, decodedResult) {
-    console.log("読み取り成功！内容:", decodedText);
+  <h2>現在の座席配置</h2>
+  <table id="seatTable">
+    <thead>
+      <tr><th>座席ID</th><th>人ID</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-    // ✅ ここがジャンプ処理！★この中に書くよ！
-    if (decodedText.startsWith("http://") || decodedText.startsWith("https://")) {
-      window.location.href = decodedText;
-      setTimeout(() => html5QrcodeScanner.clear(), 500); // ← ここがジャンプ後の停止処理
-    } else {
-      document.getElementById('result').innerText = "読み取り成功: " + decodedText;
-      html5QrcodeScanner.clear(); // ← URLでないときはすぐ止める
+  <button onclick="downloadCSV()">CSVとして保存</button>
+
+  <script>
+    let currentPerson = null;
+    const seatMap = {}; // 座席ID → 人ID
+
+    function updateTable() {
+      const tbody = document.querySelector('#seatTable tbody');
+      tbody.innerHTML = '';
+      for (const [seat, person] of Object.entries(seatMap)) {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${seat}</td><td>${person}</td>`;
+        tbody.appendChild(row);
+      }
     }
-  }
 
-  // QRコードスキャナーの初期化と実行
-  const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
-    fps: 10,
-    qrbox: 250
-  });
-  html5QrcodeScanner.render(onScanSuccess);
-</script>
+    function onScanSuccess(decodedText, decodedResult) {
+      console.log("読み取り成功:", decodedText);
 
+      if (decodedText.startsWith("http://") || decodedText.startsWith("https://")) {
+        window.location.href = decodedText;
+        setTimeout(() => html5QrcodeScanner.clear(), 500);
+        return;
+      }
+
+      if (!currentPerson) {
+        currentPerson = decodedText;
+        document.getElementById('result').innerText = `人ID「${decodedText}」を読み取りました。次に座席のQRコードをスキャンしてください。`;
+      } else {
+        const seatID = decodedText;
+        seatMap[seatID] = currentPerson;
+        document.getElementById('result').innerText = `座席「${seatID}」に「${currentPerson}」を割り当てました。`;
+        currentPerson = null;
+        updateTable();
+      }
+
+      html5QrcodeScanner.clear().then(() => {
+        html5QrcodeScanner.render(onScanSuccess);
+      });
+    }
+
+    function downloadCSV() {
+      let csv = "座席ID,人ID\n";
+      for (const [seat, person] of Object.entries(seatMap)) {
+        csv += `${seat},${person}\n`;
+      }
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "seat_assignment.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
+      fps: 10,
+      qrbox: 250
+    });
+    html5QrcodeScanner.render(onScanSuccess);
+  </script>
 
 </body>
 </html>
