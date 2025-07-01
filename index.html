@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QRコードリーダー＋CSV＋Undo＋読み取り強化</title>
+  <title>QRコードリーダー</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     body {
@@ -25,7 +25,7 @@
       position: relative;
     }
 
-    /* オーバーレイ：読み取り中表示（#reader内に移動済み） */
+    /* オーバーレイ表示 */
     #scannerOverlay {
       position: absolute;
       top: 0;
@@ -43,25 +43,6 @@
       pointer-events: none;
       border-radius: 12px;
       display: none;
-    }
-
-    #reader::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 2px;
-      width: 100%;
-      background: red;
-      animation: scanLine 2s linear infinite;
-      z-index: 3;
-      border-radius: 2px;
-    }
-
-    @keyframes scanLine {
-      0% { top: 0%; }
-      50% { top: 95%; }
-      100% { top: 0%; }
     }
 
     table {
@@ -131,7 +112,7 @@
 
     function completeCurrentSeat() {
       if (currentSeat !== null) {
-        document.getElementById('result').innerText = `座席「${currentSeat}」の登録を完了しました。次の座席QRコードを読み取ってください。`;
+        document.getElementById('result').innerText = `座席「${currentSeat}」の登録を完了しました。`;
         currentSeat = null;
         document.getElementById('completeSeatBtn').style.display = 'none';
       }
@@ -173,14 +154,14 @@
       } else {
         const people = seatMap[currentSeat];
         if (people.length >= 6) {
-          document.getElementById('result').innerText = `座席「${currentSeat}」はすでに6人登録済みです。次の座席を読み取ってください。`;
+          document.getElementById('result').innerText = `座席「${currentSeat}」はすでに6人登録済みです。`;
           completeCurrentSeat();
         } else {
           people.push(decodedText);
           lastAction = { seat: currentSeat, person: decodedText };
           document.getElementById('result').innerText = `「${decodedText}」を座席「${currentSeat}」に追加しました（${people.length}/6）。`;
           if (people.length >= 6) {
-            document.getElementById('result').innerText += ` 登録上限に達しました。次の座席を読み取ってください。`;
+            document.getElementById('result').innerText += ` 登録上限に達しました。`;
             completeCurrentSeat();
           }
           updateTable();
@@ -239,3 +220,4 @@
 
 </body>
 </html>
+
