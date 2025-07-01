@@ -41,12 +41,17 @@
     #completeSeatBtn {
       display: none;
     }
+    .student {
+      margin: 0 5px;
+      color: blue;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
 <h1>QRコードリーダー</h1>
-<p>座席（table〜）→ 生徒（player〜）を読み取り、「完了」「Undo」も可能です</p>
+<p>座席（table〜）→ 生徒（player〜）を読み取り、「完了」「Undo」も可能です。生徒名をクリックで削除可能</p>
 
 <div id="reader"></div>
 <div id="result">ここに読み取った内容が出ます</div>
@@ -73,9 +78,23 @@
     const tbody = document.querySelector('#seatTable tbody');
     tbody.innerHTML = '';
     for (const [seat, people] of Object.entries(seatMap)) {
+      const peopleHtml = people.map(person =>
+        `<span class="student" onclick="removeStudent('${seat}', '${person}')">${person} ❌</span>`
+      ).join('');
       const row = document.createElement('tr');
-      row.innerHTML = `<td>${seat}</td><td>${people.join(', ')}</td>`;
+      row.innerHTML = `<td>${seat}</td><td>${peopleHtml}</td>`;
       tbody.appendChild(row);
+    }
+  }
+
+  function removeStudent(seat, person) {
+    const people = seatMap[seat];
+    if (!people) return;
+    const index = people.indexOf(person);
+    if (index !== -1) {
+      people.splice(index, 1);
+      document.getElementById('result').innerText = `座席「${seat}」から「${person}」を削除しました。`;
+      updateTable();
     }
   }
 
@@ -106,7 +125,7 @@
 
   function onScanSuccess(decodedText, decodedResult) {
     const now = Date.now();
-    if (now - lastScanTime < 3000) return; // 1秒以内の連続読み取りを無視
+    if (now - lastScanTime < 1000) return;
     lastScanTime = now;
 
     if (!decodedText.startsWith("table") && !decodedText.startsWith("player")) {
@@ -155,7 +174,6 @@
       });
     }
 
-    // ローカル保存
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -166,7 +184,6 @@
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    // GASに送信
     uploadToDrive(csv);
   }
 
