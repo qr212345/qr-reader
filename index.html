@@ -106,7 +106,7 @@
 
   function onScanSuccess(decodedText, decodedResult) {
     const now = Date.now();
-    if (now - lastScanTime < 1000) return; // 1秒以内の連続読み取りを無視
+    if (now - lastScanTime < 3000) return; // 1秒以内の連続読み取りを無視
     lastScanTime = now;
 
     if (!decodedText.startsWith("table") && !decodedText.startsWith("player")) {
