@@ -25,7 +25,7 @@
       position: relative;
     }
 
-    /* オーバーレイ表示 */
+    /* 読み取り中オーバーレイ */
     #scannerOverlay {
       position: absolute;
       top: 0;
@@ -192,9 +192,10 @@
       URL.revokeObjectURL(url);
     }
 
+    // ✅ ここで qrbox を指定（四角いスキャン範囲を表示）
     const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
       fps: 15,
-      qrbox: { width: 300, height: 300 }
+      qrbox: { width: 250, height: 250 } // 🔲 ← ここが四角い枠！
     });
     html5QrcodeScanner.render(onScanSuccess);
 
@@ -220,4 +221,3 @@
 
 </body>
 </html>
-
