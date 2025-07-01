@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>QRコードリーダー</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
@@ -166,7 +166,7 @@
       URL.revokeObjectURL(url);
     }
 
-    // ✅ 四角い読み取り枠を表示
+    // ✅ QRコードリーダー起動（スキャン範囲を250x250に設定）
     const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
       fps: 15,
       qrbox: { width: 250, height: 250 }
