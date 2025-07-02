@@ -168,13 +168,16 @@
     <button onclick="clearSavedData()">🗑 保存データを削除</button>
   </div>
 
+  <div style="position: relative; height: 400px;">
+  <div id="reader" style="position: absolute; top: 0; left: 0; right: 0; margin: auto;"></div>
+</div>
+
   <div class="footer-area">
     <h2>現在の座席登録</h2>
     <table id="seatTable">
       <thead>
         <tr><th>座席ID</th><th>生徒ID一覧</th></tr>
       </thead>
-      <tbody></tbody>
     </table>
   </div>
 
@@ -306,12 +309,17 @@
         html5QrcodeScanner.render(onScanSuccess);
       });
     }
+const html5QrCode = new Html5Qrcode("reader");
 
-    const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
-      fps: 15,
-      qrbox: { width: 250, height: 150 }
-    });
-    html5QrcodeScanner.render(onScanSuccess);
+html5QrCode.start(
+  { facingMode: "environment" }, // 背面カメラ
+  {
+    fps: 15,
+    qrbox: { width: 250, height: 250 },
+    aspectRatio: 1.33
+  },
+  onScanSuccess
+);
   </script>
 
 </body>
