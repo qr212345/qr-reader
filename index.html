@@ -29,11 +29,20 @@
       padding: 0 1rem;
     }
 
+    #reader-wrapper {
+      position: relative;
+      height: 400px;
+    }
+
     #reader {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      margin: auto;
       width: 100%;
       max-width: 480px;
       aspect-ratio: 4 / 3;
-      margin: 0 auto 1rem;
       padding: 8px;
       background-color: #fff;
       border: 2px dashed #4caf50;
@@ -133,24 +142,6 @@
     #completeSeatBtn:hover {
       background-color: #fb8c00;
     }
-
-    @media (max-width: 480px) {
-      h1 {
-        font-size: 1.4rem;
-      }
-
-      p {
-        font-size: 0.9rem;
-      }
-
-      #reader {
-        max-width: 100%;
-      }
-
-      button {
-        font-size: 1rem;
-      }
-    }
   </style>
 </head>
 <body>
@@ -158,7 +149,10 @@
   <h1>QRコードリーダー</h1>
   <p>座席（table〜）→ 生徒（player〜）の順に読み取り。6人まで登録。生徒IDをクリックで削除。</p>
 
-  <div id="reader"></div>
+  <div id="reader-wrapper">
+    <div id="reader"></div>
+  </div>
+
   <div id="result">ここに読み取り結果が表示されます</div>
 
   <div class="button-group">
@@ -168,16 +162,13 @@
     <button onclick="clearSavedData()">🗑 保存データを削除</button>
   </div>
 
-  <div style="position: relative; height: 400px;">
-  <div id="reader" style="position: absolute; top: 0; left: 0; right: 0; margin: auto;"></div>
-</div>
-
   <div class="footer-area">
     <h2>現在の座席登録</h2>
     <table id="seatTable">
       <thead>
         <tr><th>座席ID</th><th>生徒ID一覧</th></tr>
       </thead>
+      <tbody></tbody>
     </table>
   </div>
 
@@ -270,7 +261,7 @@
 
     function onScanSuccess(decodedText) {
       const now = Date.now();
-      if (now - lastScanTime < 1000) return;
+      if (now - lastScanTime < 1000) return; // 1秒以内の連続スキャンを無視
       lastScanTime = now;
 
       if (!decodedText.startsWith("table") && !decodedText.startsWith("player")) {
@@ -304,22 +295,18 @@
           updateTable();
         }
       }
-
-      html5QrcodeScanner.clear().then(() => {
-        html5QrcodeScanner.render(onScanSuccess);
-      });
     }
-const html5QrCode = new Html5Qrcode("reader");
 
-html5QrCode.start(
-  { facingMode: "environment" }, // 背面カメラ
-  {
-    fps: 15,
-    qrbox: { width: 250, height: 250 },
-    aspectRatio: 1.33
-  },
-  onScanSuccess
-);
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+      { facingMode: "environment" },
+      {
+        fps: 15,
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.33
+      },
+      onScanSuccess
+    );
   </script>
 
 </body>
