@@ -64,15 +64,25 @@
   <tbody></tbody>
 </table>
 
+<!-- ✅ 削除ボタン -->
 <button onclick="downloadCSV()">CSVとして保存</button>
 <button id="completeSeatBtn" onclick="completeCurrentSeat()">この座席の登録を完了する</button>
 <button onclick="undoLast()">最後の追加を取り消す</button>
+<button onclick="clearSavedData()">🗑 保存データを削除</button>
 
 <script>
   let currentSeat = null;
-  const seatMap = {};
+  let seatMap = {}; // ✅ letに変更
   let lastAction = null;
   let lastScanTime = 0;
+
+  // ✅ 保存と復元（ページを開いたときに復元）
+  const savedMap = localStorage.getItem("seatMap");
+  if (savedMap) {
+    seatMap = JSON.parse(savedMap);
+    updateTable();
+    document.getElementById("result").innerText = "📦 前回の座席配置を復元しました";
+  }
 
   function updateTable() {
     const tbody = document.querySelector('#seatTable tbody');
@@ -85,6 +95,8 @@
       row.innerHTML = `<td>${seat}</td><td>${peopleHtml}</td>`;
       tbody.appendChild(row);
     }
+    // ✅ 保存するたびにローカルにも記録
+    localStorage.setItem("seatMap", JSON.stringify(seatMap));
   }
 
   function removeStudent(seat, person) {
@@ -201,6 +213,16 @@
       console.error("エラー:", err);
       alert("保存失敗: " + err.message);
     });
+  }
+
+  // ✅ 削除ボタン用関数
+  function clearSavedData() {
+    if (confirm("保存されたデータをすべて削除します。よろしいですか？")) {
+      localStorage.removeItem("seatMap");
+      seatMap = {};
+      updateTable();
+      document.getElementById("result").innerText = "保存されたデータを削除しました。";
+    }
   }
 
   const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
