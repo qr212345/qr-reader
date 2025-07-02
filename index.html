@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>QRコードリーダー（フォーカス枠付き）</title>
+  <title>QRコードリーダー（フォーカス枠＋scan()連続認識）</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     body {
@@ -20,7 +20,7 @@
       margin-bottom: 0.5rem;
     }
     #reader-wrapper {
-      position: relative; /* ここが重要 */
+      position: relative;
       width: 100%;
       max-width: 480px;
       margin: 0 auto 1.5rem;
@@ -30,7 +30,6 @@
       background-color: #fff;
       aspect-ratio: 4 / 3;
     }
-    /* スマホは正方形に */
     @media screen and (max-width: 480px) {
       #reader-wrapper {
         aspect-ratio: 1 / 1;
@@ -46,7 +45,7 @@
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      pointer-events: none; /* 操作を邪魔しない */
+      pointer-events: none;
       border-radius: 12px;
     }
     #result {
@@ -284,10 +283,13 @@
       }
     }
 
-    // --- フォーカス枠canvasの描画関連 ---
+    // --- canvasフォーカス枠と連続スキャン処理 ---
     const canvas = document.getElementById('focusCanvas');
     const ctx = canvas.getContext('2d');
     const readerWrapper = document.getElementById('reader-wrapper');
+
+    let isScanning = false;
+    const html5QrCode = new Html5Qrcode("reader");
 
     function resizeCanvas() {
       canvas.width = readerWrapper.clientWidth;
@@ -298,10 +300,10 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.strokeStyle = 'limegreen';
       ctx.lineWidth = 4;
-      const size = Math.min(canvas.width, canvas.height) * 0.6;  // 枠のサイズは60%
+      const size = Math.min(canvas.width, canvas.height) * 0.6;
       const x = (canvas.width - size) / 2;
       const y = (canvas.height - size) / 2;
-      const lineLen = size * 0.1;  // 線の長さは枠サイズの10%
+      const lineLen = size * 0.1;
 
       ctx.beginPath();
       // 左上
@@ -322,33 +324,35 @@
       ctx.lineTo(x + size, y + size - lineLen);
       ctx.stroke();
 
+      if (!isScanning) {
+        isScanning = true;
+        html5QrCode.scan()
+          .then(decodedText => {
+            onScanSuccess(decodedText);
+          })
+          .catch(err => {
+            // 認識失敗は無視
+          })
+          .finally(() => {
+            isScanning = false;
+          });
+      }
+
       requestAnimationFrame(drawFocusBox);
     }
 
-    window.addEventListener('resize', () => {
-      resizeCanvas();
-    });
+    window.addEventListener('resize', resizeCanvas);
     window.addEventListener('load', () => {
       resizeCanvas();
-      drawFocusBox();
+      html5QrCode.startCamera({ facingMode: "environment" })
+        .then(() => {
+          drawFocusBox();
+        })
+        .catch(err => {
+          document.getElementById("result").innerText = "カメラ起動に失敗しました: " + err;
+        });
     });
 
-    // --- html5-qrcode 起動 ---
-    document.addEventListener("DOMContentLoaded", () => {
-      const html5QrCode = new Html5Qrcode("reader");
-      html5QrCode.start(
-        { facingMode: "environment" },
-        {
-          fps: 15,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.33
-        },
-        onScanSuccess
-      ).catch(err => {
-        console.error("カメラ起動エラー:", err);
-        document.getElementById("result").innerText = "カメラ起動に失敗しました: " + err;
-      });
-    });
   </script>
 
 </body>
