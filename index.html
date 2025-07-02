@@ -154,7 +154,6 @@ tbody tr:last-child td {
 .student:hover {
   background-color: #bbdefb;
 }
-    
   </style>
 </head>
 <body>
@@ -201,7 +200,7 @@ tbody tr:last-child td {
 
     function completeCurrentSeat() {
       if (currentSeat) {
-        document.getElementById("result").innerText = 座席「${currentSeat}」の登録を完了しました。;
+        document.getElementById("result").innerText = `座席「${currentSeat}」の登録を完了しました。`;
         currentSeat = null;
         document.getElementById("completeSeatBtn").style.display = "none";
       }
@@ -213,7 +212,7 @@ tbody tr:last-child td {
         const people = seatMap[seat];
         if (people && people[people.length - 1] === person) {
           people.pop();
-          document.getElementById("result").innerText = 「${person}」の登録を取り消しました。;
+          document.getElementById("result").innerText = `「${person}」の登録を取り消しました。`;
           lastAction = null;
           updateTable();
         }
@@ -233,7 +232,7 @@ tbody tr:last-child td {
       let csv = "座席ID,生徒ID\n";
       for (const [seat, people] of Object.entries(seatMap)) {
         people.forEach(person => {
-          csv += ${seat},${person}\n;
+          csv += `${seat},${person}\n`;
         });
       }
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -251,12 +250,12 @@ tbody tr:last-child td {
       tbody.innerHTML = '';
       for (const [seat, people] of Object.entries(seatMap)) {
         const row = document.createElement('tr');
-        row.innerHTML = 
+        row.innerHTML = `
           <td>${seat}</td>
           <td>${people.map(p =>
-            <span class="student" onclick="removeStudent('${seat}', '${p}')">${p} ❌</span>
+            `<span class="student" onclick="removeStudent('${seat}', '${p}')">${p} ❌</span>`
           ).join(' ')}</td>
-        ;
+        `;
         tbody.appendChild(row);
       }
       localStorage.setItem("seatMap", JSON.stringify(seatMap));
@@ -267,7 +266,7 @@ tbody tr:last-child td {
       const index = people.indexOf(person);
       if (index !== -1) {
         people.splice(index, 1);
-        document.getElementById("result").innerText = 座席「${seat}」から「${person}」を削除しました。;
+        document.getElementById("result").innerText = `座席「${seat}」から「${person}」を削除しました。`;
         updateTable();
       }
     }
@@ -285,7 +284,7 @@ tbody tr:last-child td {
       if (decodedText.startsWith("table")) {
         currentSeat = decodedText;
         if (!seatMap[currentSeat]) seatMap[currentSeat] = [];
-        document.getElementById("result").innerText = 座席「${currentSeat}」を読み取りました。最大6人まで登録可能。;
+        document.getElementById("result").innerText = `座席「${currentSeat}」を読み取りました。最大6人まで登録可能。`;
         document.getElementById("completeSeatBtn").style.display = "block";
       } else if (decodedText.startsWith("player")) {
         if (!currentSeat) {
@@ -294,14 +293,14 @@ tbody tr:last-child td {
         }
         const people = seatMap[currentSeat];
         if (people.length >= 6) {
-          document.getElementById("result").innerText = 座席「${currentSeat}」は6人までです。;
+          document.getElementById("result").innerText = `座席「${currentSeat}」は6人までです。`;
           completeCurrentSeat();
         } else if (people.includes(decodedText)) {
-          document.getElementById("result").innerText = 「${decodedText}」は既に座席「${currentSeat}」に登録されています。;
+          document.getElementById("result").innerText = `「${decodedText}」は既に座席「${currentSeat}」に登録されています。`;
         } else {
           people.push(decodedText);
           lastAction = { seat: currentSeat, person: decodedText };
-          document.getElementById("result").innerText = 「${decodedText}」を座席「${currentSeat}」に登録（${people.length}/6）;
+          document.getElementById("result").innerText = `「${decodedText}」を座席「${currentSeat}」に登録（${people.length}/6）`;
           if (people.length >= 6) {
             document.getElementById("result").innerText += " 上限に達しました。";
             completeCurrentSeat();
@@ -318,9 +317,6 @@ tbody tr:last-child td {
     const canvas = document.getElementById('focusCanvas');
     const ctx = canvas.getContext('2d');
     const readerWrapper = document.getElementById('reader-wrapper');
-
-    let isScanning = false;
-    const html5QrCode = new Html5Qrcode("reader");
 
     function resizeCanvas() {
       canvas.width = readerWrapper.clientWidth;
@@ -355,34 +351,31 @@ tbody tr:last-child td {
       ctx.lineTo(x + size, y + size - lineLen);
       ctx.stroke();
 
-      // scan()は1回終わってから次を呼ぶので多重防止
-      if (!isScanning) {
-        isScanning = true;
-        html5QrCode.scan()
-          .then(decodedText => {
-            onScanSuccess(decodedText);
-          })
-          .catch(_ => {
-            // 認識失敗は無視
-          })
-          .finally(() => {
-            isScanning = false;
-          });
-      }
-
       requestAnimationFrame(drawFocusBox);
     }
+
+    const html5QrCode = new Html5Qrcode("reader");
 
     window.addEventListener('resize', resizeCanvas);
     window.addEventListener('load', () => {
       resizeCanvas();
-      html5QrCode.startCamera({ facingMode: "environment" })
-        .then(() => {
-          drawFocusBox();
-        })
-        .catch(err => {
-          document.getElementById("result").innerText = "カメラ起動に失敗しました: " + err;
-        });
+      html5QrCode.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 }
+        },
+        (decodedText, decodedResult) => {
+          onScanSuccess(decodedText);
+        },
+        (errorMessage) => {
+          // 読み取り失敗は無視
+        }
+      ).then(() => {
+        drawFocusBox();
+      }).catch(err => {
+        document.getElementById("result").innerText = "カメラ起動に失敗しました: " + err;
+      });
     });
   </script>
 
