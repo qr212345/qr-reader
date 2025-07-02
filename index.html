@@ -6,39 +6,46 @@
   <title>QRコードリーダー（削除機能付き）</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f0f4f8;
-      color: #333;
-      margin: 0;
-      padding: 1rem;
-      text-align: center;
-      overflow-x: hidden;
-    }
+    <style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f8;
+    color: #333;
+    margin: 0;
+    padding: 1rem;
+    text-align: center;
+    overflow-x: hidden;
+  }
 
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 0.5rem;
-    }
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+  }
 
+  /* 読み取り枠（#reader-wrapper）を横長から通常、スマホは正方形に */
+  #reader-wrapper {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto 1.5rem;
+    border: 2px dashed #4caf50;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    background-color: #fff;
+    aspect-ratio: 4 / 3;  /* デフォルトは横長 */
+  }
+
+  @media screen and (max-width: 480px) {
     #reader-wrapper {
-      position: relative;
-      width: 100%;
-      max-width: 480px;
-      margin: 0 auto 1.5rem;
-      border: 2px dashed #4caf50;
-      border-radius: 12px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-      background-color: #fff;
-      aspect-ratio: 4 / 3;
+      aspect-ratio: 1 / 1;  /* スマホ以下は正方形 */
     }
+  }
 
-    #reader {
-      width: 100%;
-      height: 100%;
-      border-radius: 12px;
-      overflow: hidden;
-    }
+  #reader {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+  }
 
     #result {
       font-weight: bold;
