@@ -30,7 +30,7 @@ h1 {
   margin: 0 auto 1.5rem;
   border: 2px dashed #4caf50;
   border-radius: 12px;
-  box-shadow: 0 12px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
   background-color: #fff;
   aspect-ratio: 4 / 3;
 }
@@ -258,7 +258,7 @@ tbody tr:last-child td {
 
     function onScanSuccess(decodedText) {
       const now = Date.now();
-      if (now - lastScanTime < 1000) return; // 1秒以内の連続スキャンを無視
+      if (now - lastScanTime < 3000) return; // 1秒以内の連続スキャンを無視
       lastScanTime = now;
 
       if (!decodedText.startsWith("table") && !decodedText.startsWith("player")) {
