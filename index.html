@@ -3,167 +3,160 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>QRコードリーダー（スマホ最適化）</title>
+  <title>QRコードリーダー（削除機能付き）</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
-  body {
-  font-family: 'Segoe UI', sans-serif;
-  text-align: center;
-  margin: 0;
-  padding: 1rem;
-  background-color: #f0f4f8;
-  color: #333;
-  overflow-x: hidden;
-  padding-bottom: 12rem; /* スマホで下部のボタンに被らないように十分な余白 */
-}
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 1rem;
+      background-color: #f0f4f8;
+      color: #333;
+      overflow-x: hidden;
+      padding-bottom: 12rem;
+    }
 
-/* タイトルと説明 */
-h1 {
-  font-size: 1.8rem;
-  margin-bottom: 0.5rem;
-}
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+    }
 
-p {
-  font-size: 1rem;
-  color: #555;
-  margin-bottom: 1.5rem;
-  padding: 0 1rem;
-}
+    p {
+      font-size: 1rem;
+      color: #555;
+      margin-bottom: 1.5rem;
+      padding: 0 1rem;
+    }
 
-/* QRコードリーダー */
-#reader {
-  width: 100%;
-  max-width: 480px;
-  aspect-ratio: 4 / 3;
-  margin: 0 auto 1rem;
-  padding: 8px;
-  background-color: #fff;
-  border: 2px dashed #4caf50;
-  border-radius: 12px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-}
+    #reader {
+      width: 100%;
+      max-width: 480px;
+      aspect-ratio: 4 / 3;
+      margin: 0 auto 1rem;
+      padding: 8px;
+      background-color: #fff;
+      border: 2px dashed #4caf50;
+      border-radius: 12px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
 
-/* スキャン結果 */
-#result {
-  font-weight: bold;
-  padding: 0.8rem;
-  background-color: #e0f7fa;
-  border-radius: 8px;
-  max-width: 90%;
-  margin: 0 auto 1.5rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  word-break: break-word;
-}
+    #result {
+      font-weight: bold;
+      padding: 0.8rem;
+      background-color: #e0f7fa;
+      border-radius: 8px;
+      max-width: 90%;
+      margin: 0 auto 1.5rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      word-break: break-word;
+    }
 
-/* テーブル全体の領域を横スクロール対応に */
-.footer-area {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 2px solid #ccc;
-  overflow-x: auto;
-}
+    .footer-area {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 2px solid #ccc;
+      overflow-x: auto;
+    }
 
-table {
-  margin: 0 auto;
-  border-collapse: collapse;
-  width: 95%;
-  max-width: 800px;
-  background-color: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-}
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+      width: 95%;
+      max-width: 800px;
+      background-color: #fff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
 
-th, td {
-  padding: 10px;
-  border: 1px solid #ddd;
-}
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+    }
 
-th {
-  background-color: #4caf50;
-  color: white;
-}
+    th {
+      background-color: #4caf50;
+      color: white;
+    }
 
-.student {
-  display: inline-block;
-  background-color: #e3f2fd;
-  color: #1976d2;
-  padding: 4px 8px;
-  border-radius: 16px;
-  margin: 4px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  word-break: break-word;
-}
+    .student {
+      display: inline-block;
+      background-color: #e3f2fd;
+      color: #1976d2;
+      padding: 4px 8px;
+      border-radius: 16px;
+      margin: 4px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      word-break: break-word;
+    }
 
-.student:hover {
-  background-color: #bbdefb;
-}
+    .student:hover {
+      background-color: #bbdefb;
+    }
 
-/* ボタン類を縦並び＆中央配置 */
-.button-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 1.5rem auto 3rem;
-  max-width: 320px;
-}
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 1.5rem auto 3rem;
+      max-width: 320px;
+    }
 
-button {
-  width: 100%;
-  padding: 0.8rem 1rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 8px;
-  background-color: #4caf50;
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
-}
+    button {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #4caf50;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+    }
 
-button:hover {
-  background-color: #43a047;
-}
+    button:hover {
+      background-color: #43a047;
+    }
 
-button:active {
-  transform: scale(0.97);
-}
+    button:active {
+      transform: scale(0.97);
+    }
 
-#completeSeatBtn {
-  display: none;
-  background-color: #ff9800;
-}
+    #completeSeatBtn {
+      display: none;
+      background-color: #ff9800;
+    }
 
-#completeSeatBtn:hover {
-  background-color: #fb8c00;
-}
+    #completeSeatBtn:hover {
+      background-color: #fb8c00;
+    }
 
-/* モバイル向け微調整 */
-@media (max-width: 480px) {
-  h1 {
-    font-size: 1.4rem;
-  }
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.4rem;
+      }
 
-  p {
-    font-size: 0.9rem;
-  }
+      p {
+        font-size: 0.9rem;
+      }
 
-  #reader {
-    aspect-ratio: 4 / 3;
-    max-width: 100%;
-  }
+      #reader {
+        max-width: 100%;
+      }
 
-  button {
-    font-size: 1rem;
-  }
-}
+      button {
+        font-size: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
 
   <h1>QRコードリーダー</h1>
-  <p>座席（table〜）→ 生徒（player〜）の順に読み取り。6人まで登録可。</p>
+  <p>座席（table〜）→ 生徒（player〜）の順に読み取り。6人まで登録。生徒IDをクリックで削除。</p>
 
   <div id="reader"></div>
   <div id="result">ここに読み取り結果が表示されます</div>
@@ -173,6 +166,16 @@ button:active {
     <button id="completeSeatBtn" onclick="completeCurrentSeat()">この座席の登録を完了</button>
     <button onclick="undoLast()">最後の追加を取り消す</button>
     <button onclick="clearSavedData()">🗑 保存データを削除</button>
+  </div>
+
+  <div class="footer-area">
+    <h2>現在の座席登録</h2>
+    <table id="seatTable">
+      <thead>
+        <tr><th>座席ID</th><th>生徒ID一覧</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
 
   <script>
@@ -185,6 +188,7 @@ button:active {
     if (savedMap) {
       seatMap = JSON.parse(savedMap);
       document.getElementById("result").innerText = "📦 前回のデータを復元しました";
+      updateTable();
     }
 
     function completeCurrentSeat() {
@@ -203,6 +207,7 @@ button:active {
           people.pop();
           document.getElementById("result").innerText = `「${person}」の登録を取り消しました。`;
           lastAction = null;
+          updateTable();
         }
       }
     }
@@ -212,6 +217,7 @@ button:active {
         localStorage.removeItem("seatMap");
         seatMap = {};
         document.getElementById("result").innerText = "保存されたデータを削除しました。";
+        updateTable();
       }
     }
 
@@ -233,7 +239,33 @@ button:active {
       document.body.removeChild(a);
     }
 
-    function onScanSuccess(decodedText, decodedResult) {
+    function updateTable() {
+      const tbody = document.querySelector('#seatTable tbody');
+      tbody.innerHTML = '';
+      for (const [seat, people] of Object.entries(seatMap)) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${seat}</td>
+          <td>${people.map(p =>
+            `<span class="student" onclick="removeStudent('${seat}', '${p}')">${p} ❌</span>`
+          ).join(' ')}</td>
+        `;
+        tbody.appendChild(row);
+      }
+      localStorage.setItem("seatMap", JSON.stringify(seatMap));
+    }
+
+    function removeStudent(seat, person) {
+      const people = seatMap[seat];
+      const index = people.indexOf(person);
+      if (index !== -1) {
+        people.splice(index, 1);
+        document.getElementById("result").innerText = `座席「${seat}」から「${person}」を削除しました。`;
+        updateTable();
+      }
+    }
+
+    function onScanSuccess(decodedText) {
       const now = Date.now();
       if (now - lastScanTime < 1000) return;
       lastScanTime = now;
@@ -265,8 +297,9 @@ button:active {
             document.getElementById("result").innerText += " 上限に達しました。";
             completeCurrentSeat();
           }
+          localStorage.setItem("seatMap", JSON.stringify(seatMap));
+          updateTable();
         }
-        localStorage.setItem("seatMap", JSON.stringify(seatMap));
       }
 
       html5QrcodeScanner.clear().then(() => {
@@ -280,5 +313,6 @@ button:active {
     });
     html5QrcodeScanner.render(onScanSuccess);
   </script>
+
 </body>
 </html>
