@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>QRコードリーダー（フォーカス枠＋scan()連続認識）</title>
+  <title>QRコードリーダー（スマホで正方形映像＋枠）</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     body {
@@ -28,11 +28,12 @@
       border-radius: 12px;
       box-shadow: 0 6px 12px rgba(0,0,0,0.1);
       background-color: #fff;
-      aspect-ratio: 4 / 3;
+      aspect-ratio: 4 / 3; /* PCは4:3 */
     }
     @media screen and (max-width: 480px) {
       #reader-wrapper {
-        aspect-ratio: 1 / 1;
+        aspect-ratio: 1 / 1; /* スマホは正方形 */
+        max-width: 100vw;
       }
     }
     #reader {
@@ -283,7 +284,9 @@
       }
     }
 
-    // --- canvasフォーカス枠と連続スキャン処理 ---
+    // ---------------------------
+    // canvasフォーカス枠とhtml5-qrcodeの起動処理
+    // ---------------------------
     const canvas = document.getElementById('focusCanvas');
     const ctx = canvas.getContext('2d');
     const readerWrapper = document.getElementById('reader-wrapper');
@@ -324,13 +327,14 @@
       ctx.lineTo(x + size, y + size - lineLen);
       ctx.stroke();
 
+      // scan()は1回終わってから次を呼ぶので多重防止
       if (!isScanning) {
         isScanning = true;
         html5QrCode.scan()
           .then(decodedText => {
             onScanSuccess(decodedText);
           })
-          .catch(err => {
+          .catch(_ => {
             // 認識失敗は無視
           })
           .finally(() => {
@@ -352,7 +356,6 @@
           document.getElementById("result").innerText = "カメラ起動に失敗しました: " + err;
         });
     });
-
   </script>
 
 </body>
