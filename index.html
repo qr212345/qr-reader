@@ -29,25 +29,28 @@
       padding: 0 1rem;
     }
 
+    /* スキャン画面の親コンテナ：アスペクト比4:3をpadding-bottomで確保 */
     #reader-wrapper {
       position: relative;
-      height: 400px;
+      width: 100%;
+      max-width: 480px;
+      height: 0;
+      padding-bottom: 75%; /* 4:3比率 */
+      margin: 0 auto 1rem;
     }
 
+    /* カメラ映像の枠 */
     #reader {
       position: absolute;
       top: 0;
       left: 0;
-      right: 0;
-      margin: auto;
       width: 100%;
-      max-width: 480px;
-      aspect-ratio: 4 / 3;
-      padding: 8px;
-      background-color: #fff;
+      height: 100%;
       border: 2px dashed #4caf50;
       border-radius: 12px;
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+      background-color: #fff;
+      padding: 0;
     }
 
     #result {
@@ -283,6 +286,8 @@
         if (people.length >= 6) {
           document.getElementById("result").innerText = `座席「${currentSeat}」は6人までです。`;
           completeCurrentSeat();
+        } else if (people.includes(decodedText)) {
+          document.getElementById("result").innerText = `「${decodedText}」は既に座席「${currentSeat}」に登録されています。`;
         } else {
           people.push(decodedText);
           lastAction = { seat: currentSeat, person: decodedText };
