@@ -6,115 +6,126 @@
   <title>QRコードリーダー</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
-/* ベース設定 */
-body {
-  font-family: 'Segoe UI', sans-serif;
-  text-align: center;
-  margin: 2rem;
-  background-color: #f0f4f8;
-  color: #333;
-}
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      margin: 2rem;
+      background-color: #f0f4f8;
+      color: #333;
+    }
 
-/* タイトル・説明文 */
-h1 {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-p {
-  font-size: 0.95rem;
-  color: #555;
-  margin-bottom: 2rem;
-}
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
 
-/* QRリーダー表示部分 */
-#reader {
-  width: 100%;
-  max-width: 400px;
-  aspect-ratio: 4 / 3;
-  margin: 0 auto 1.5rem;
-  padding: 10px;
-  border: 2px dashed #4caf50;
-  border-radius: 12px;
-  background-color: #ffffff;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-}
+    p {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 2rem;
+    }
 
-/* 結果表示 */
-#result {
-  font-weight: bold;
-  margin-bottom: 1.5rem;
-  padding: 0.8rem;
-  background-color: #e0f7fa;
-  border-radius: 8px;
-  width: fit-content;
-  max-width: 90%;
-  margin-left: auto;
-  margin-right: auto;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
+    #reader {
+      width: 100%;
+      max-width: 400px;
+      aspect-ratio: 4 / 3;
+      margin: 0 auto 1.5rem;
+      padding: 10px;
+      border: 2px dashed #4caf50;
+      border-radius: 12px;
+      background-color: #ffffff;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
 
-/* 座席テーブル */
-table {
-  margin: 1.5rem auto;
-  border-collapse: collapse;
-  width: 95%;
-  max-width: 600px;
-  background-color: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  border-radius: 8px;
-  overflow: hidden;
-}
-th {
-  background-color: #4caf50;
-  color: white;
-  padding: 10px;
-}
-td {
-  border: 1px solid #ddd;
-  padding: 10px;
-}
+    #result {
+      font-weight: bold;
+      margin-bottom: 2rem;
+      padding: 0.8rem;
+      background-color: #e0f7fa;
+      border-radius: 8px;
+      width: fit-content;
+      max-width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
 
-/* 生徒の表示と削除ボタン風の見た目 */
-.student {
-  display: inline-block;
-  background-color: #e3f2fd;
-  color: #1976d2;
-  padding: 4px 8px;
-  border-radius: 16px;
-  margin: 4px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-.student:hover {
-  background-color: #bbdefb;
-}
+    .footer-area {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 2px solid #ccc;
+    }
 
-/* ボタン共通 */
-button {
-  margin: 0.5rem 0.4rem;
-  padding: 0.6rem 1.2rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 8px;
-  background-color: #4caf50;
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
-}
-button:hover {
-  background-color: #43a047;
-}
-button:active {
-  transform: scale(0.98);
-}
-#completeSeatBtn {
-  display: none;
-  background-color: #ff9800;
-}
-#completeSeatBtn:hover {
-  background-color: #fb8c00;
-}
+    table {
+      margin: 1.5rem auto;
+      border-collapse: collapse;
+      width: 95%;
+      max-width: 600px;
+      background-color: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th {
+      background-color: #4caf50;
+      color: white;
+      padding: 10px;
+    }
+
+    td {
+      border: 1px solid #ddd;
+      padding: 10px;
+    }
+
+    .student {
+      display: inline-block;
+      background-color: #e3f2fd;
+      color: #1976d2;
+      padding: 4px 8px;
+      border-radius: 16px;
+      margin: 4px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .student:hover {
+      background-color: #bbdefb;
+    }
+
+    .button-group {
+      margin-top: 1rem;
+    }
+
+    button {
+      margin: 0.5rem 0.4rem;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #4caf50;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    button:hover {
+      background-color: #43a047;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    #completeSeatBtn {
+      display: none;
+      background-color: #ff9800;
+    }
+
+    #completeSeatBtn:hover {
+      background-color: #fb8c00;
+    }
   </style>
 </head>
 <body>
@@ -125,27 +136,30 @@ button:active {
 <div id="reader"></div>
 <div id="result">ここに読み取った内容が出ます</div>
 
-<h2>現在の座席配置</h2>
-<table id="seatTable">
-  <thead>
-    <tr><th>座席ID</th><th>登録された生徒ID</th></tr>
-  </thead>
-  <tbody></tbody>
-</table>
+<!-- ▼ 移動した座席表示とボタンエリア -->
+<div class="footer-area">
+  <h2>現在の座席配置</h2>
+  <table id="seatTable">
+    <thead>
+      <tr><th>座席ID</th><th>登録された生徒ID</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-<!-- ✅ 削除ボタン -->
-<button onclick="downloadCSV()">CSVとして保存</button>
-<button id="completeSeatBtn" onclick="completeCurrentSeat()">この座席の登録を完了する</button>
-<button onclick="undoLast()">最後の追加を取り消す</button>
-<button onclick="clearSavedData()">🗑 保存データを削除</button>
+  <div class="button-group">
+    <button onclick="downloadCSV()">CSVとして保存</button>
+    <button id="completeSeatBtn" onclick="completeCurrentSeat()">この座席の登録を完了する</button>
+    <button onclick="undoLast()">最後の追加を取り消す</button>
+    <button onclick="clearSavedData()">🗑 保存データを削除</button>
+  </div>
+</div>
 
 <script>
   let currentSeat = null;
-  let seatMap = {}; // ✅ letに変更
+  let seatMap = {};
   let lastAction = null;
   let lastScanTime = 0;
 
-  // ✅ 保存と復元（ページを開いたときに復元）
   const savedMap = localStorage.getItem("seatMap");
   if (savedMap) {
     seatMap = JSON.parse(savedMap);
@@ -164,7 +178,6 @@ button:active {
       row.innerHTML = `<td>${seat}</td><td>${peopleHtml}</td>`;
       tbody.appendChild(row);
     }
-    // ✅ 保存するたびにローカルにも記録
     localStorage.setItem("seatMap", JSON.stringify(seatMap));
   }
 
@@ -259,7 +272,7 @@ button:active {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "seat_assignment.csv";
+    a.download = "seat_assignment_" + new Date().toISOString().replace(/[:.-]/g, "_") + ".csv";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -284,7 +297,6 @@ button:active {
     });
   }
 
-  // ✅ 削除ボタン用関数
   function clearSavedData() {
     if (confirm("保存されたデータをすべて削除します。よろしいですか？")) {
       localStorage.removeItem("seatMap");
