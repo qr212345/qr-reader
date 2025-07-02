@@ -3,54 +3,52 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>QRコードリーダー（削除機能付き）</title>
+  <title>QRコードリーダー（フォーカス枠付き）</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
-    <style>
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f0f4f8;
-    color: #333;
-    margin: 0;
-    padding: 1rem;
-    text-align: center;
-    overflow-x: hidden;
-  }
-
-  h1 {
-    font-size: 1.8rem;
-    margin-bottom: 0.5rem;
-  }
-
-  /* 読み取り枠（#reader-wrapper）を横長から通常、スマホは正方形に */
-  #reader-wrapper {
-    width: 100%;
-    max-width: 480px;
-    margin: 0 auto 1.5rem;
-    border: 2px dashed #4caf50;
-    border-radius: 12px;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-    background-color: #fff;
-    aspect-ratio: 4 / 3;  /* デフォルトは横長 */
-  }
-
-  @media screen and (max-width: 480px) {
-    #reader-wrapper {
-      aspect-ratio: 1 / 1;  /* スマホ以下は正方形 */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f4f8;
+      color: #333;
+      margin: 0;
+      padding: 1rem;
+      text-align: center;
+      overflow-x: hidden;
     }
-  }
-
- #reader {
-  width: 100%;
-  height: 0;
-  padding-bottom: 100%; /* 横幅に対して高さを100%にする */
-  position: relative;
-  border: 2px solid limegreen; /* 緑色の枠線 */
-  box-sizing: border-box;
-  border-radius: 12px;
-  overflow: hidden;
-}
-    
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+    }
+    #reader-wrapper {
+      position: relative; /* ここが重要 */
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto 1.5rem;
+      border: 2px dashed #4caf50;
+      border-radius: 12px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      background-color: #fff;
+      aspect-ratio: 4 / 3;
+    }
+    /* スマホは正方形に */
+    @media screen and (max-width: 480px) {
+      #reader-wrapper {
+        aspect-ratio: 1 / 1;
+      }
+    }
+    #reader {
+      width: 100%;
+      height: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    #focusCanvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; /* 操作を邪魔しない */
+      border-radius: 12px;
+    }
     #result {
       font-weight: bold;
       background-color: #e0f7fa;
@@ -61,7 +59,6 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       word-break: break-word;
     }
-
     .button-group {
       display: flex;
       flex-direction: column;
@@ -69,7 +66,6 @@
       max-width: 320px;
       margin: 1rem auto 3rem;
     }
-
     button {
       background-color: #4caf50;
       color: white;
@@ -80,23 +76,18 @@
       cursor: pointer;
       transition: background-color 0.3s ease, transform 0.1s ease;
     }
-
     button:hover {
       background-color: #43a047;
     }
-
     button:active {
       transform: scale(0.97);
     }
-
     #completeSeatBtn {
       background-color: #ff9800;
     }
-
     #completeSeatBtn:hover {
       background-color: #fb8c00;
     }
-
     table {
       width: 95%;
       max-width: 800px;
@@ -107,24 +98,20 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       overflow: hidden;
     }
-
     th {
       background-color: #4caf50;
       color: white;
       padding: 10px;
       text-align: left;
     }
-
     td {
       padding: 10px;
       border-bottom: 1px solid #ddd;
       vertical-align: middle;
     }
-
     tbody tr:last-child td {
       border-bottom: none;
     }
-
     .student {
       display: inline-block;
       background-color: #e3f2fd;
@@ -137,16 +124,8 @@
       user-select: none;
       transition: background-color 0.2s ease;
     }
-
     .student:hover {
       background-color: #bbdefb;
-    }
-
-    /* ✅ スマホ向けの読み取り枠調整（正方形に） */
-    @media screen and (max-width: 480px) {
-      #reader-wrapper {
-        aspect-ratio: 1 / 1;
-      }
     }
   </style>
 </head>
@@ -157,13 +136,14 @@
 
   <div id="reader-wrapper">
     <div id="reader"></div>
+    <canvas id="focusCanvas"></canvas>
   </div>
 
   <div id="result">ここに読み取り結果が表示されます</div>
 
   <div class="button-group">
     <button onclick="downloadCSV()">CSVで保存</button>
-    <button id="completeSeatBtn" onclick="completeCurrentSeat()">この座席の登録を完了</button>
+    <button id="completeSeatBtn" onclick="completeCurrentSeat()" style="display:none;">この座席の登録を完了</button>
     <button onclick="undoLast()">最後の追加を取り消す</button>
     <button onclick="clearSavedData()">🗑 保存データを削除</button>
   </div>
@@ -266,7 +246,7 @@
 
     function onScanSuccess(decodedText) {
       const now = Date.now();
-      if (now - lastScanTime < 3000) return; // 1秒以内の連続スキャンを無視
+      if (now - lastScanTime < 3000) return; // 3秒以内の連続スキャンを無視
       lastScanTime = now;
 
       if (!decodedText.startsWith("table") && !decodedText.startsWith("player")) {
@@ -304,6 +284,56 @@
       }
     }
 
+    // --- フォーカス枠canvasの描画関連 ---
+    const canvas = document.getElementById('focusCanvas');
+    const ctx = canvas.getContext('2d');
+    const readerWrapper = document.getElementById('reader-wrapper');
+
+    function resizeCanvas() {
+      canvas.width = readerWrapper.clientWidth;
+      canvas.height = readerWrapper.clientHeight;
+    }
+
+    function drawFocusBox() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = 'limegreen';
+      ctx.lineWidth = 4;
+      const size = Math.min(canvas.width, canvas.height) * 0.6;  // 枠のサイズは60%
+      const x = (canvas.width - size) / 2;
+      const y = (canvas.height - size) / 2;
+      const lineLen = size * 0.1;  // 線の長さは枠サイズの10%
+
+      ctx.beginPath();
+      // 左上
+      ctx.moveTo(x, y + lineLen);
+      ctx.lineTo(x, y);
+      ctx.lineTo(x + lineLen, y);
+      // 右上
+      ctx.moveTo(x + size - lineLen, y);
+      ctx.lineTo(x + size, y);
+      ctx.lineTo(x + size, y + lineLen);
+      // 左下
+      ctx.moveTo(x, y + size - lineLen);
+      ctx.lineTo(x, y + size);
+      ctx.lineTo(x + lineLen, y + size);
+      // 右下
+      ctx.moveTo(x + size - lineLen, y + size);
+      ctx.lineTo(x + size, y + size);
+      ctx.lineTo(x + size, y + size - lineLen);
+      ctx.stroke();
+
+      requestAnimationFrame(drawFocusBox);
+    }
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+    });
+    window.addEventListener('load', () => {
+      resizeCanvas();
+      drawFocusBox();
+    });
+
+    // --- html5-qrcode 起動 ---
     document.addEventListener("DOMContentLoaded", () => {
       const html5QrCode = new Html5Qrcode("reader");
       html5QrCode.start(
