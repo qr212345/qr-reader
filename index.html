@@ -6,145 +6,141 @@
   <title>QRコードリーダー（削除機能付き）</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 1rem;
-      background-color: #f0f4f8;
-      color: #333;
-      overflow-x: hidden;
-      padding-bottom: 12rem;
-    }
+   /* 全体のフォントと背景 */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f0f4f8;
+  color: #333;
+  margin: 0;
+  padding: 1rem;
+  text-align: center;
+  overflow-x: hidden;
+}
 
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 0.5rem;
-    }
+/* タイトル */
+h1 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
 
-    p {
-      font-size: 1rem;
-      color: #555;
-      margin-bottom: 1.5rem;
-      padding: 0 1rem;
-    }
+/* カメラ表示領域のラッパー */
+#reader-wrapper {
+  position: relative;
+  max-width: 480px;
+  margin: 0 auto 1.5rem;
+  border: 2px dashed #4caf50;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+  background-color: #fff;
+  aspect-ratio: 4 / 3;
+}
 
-    /* スキャン画面の親コンテナ：アスペクト比4:3をpadding-bottomで確保 */
-    #reader-wrapper {
-      position: relative;
-      width: 100%;
-      max-width: 480px;
-      height: 0;
-      padding-bottom: 75%; /* 4:3比率 */
-      margin: 0 auto 1rem;
-    }
+/* 実際のカメラ映像表示部分 */
+#reader {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+}
 
-    /* カメラ映像の枠 */
-    #reader {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: 2px dashed #4caf50;
-      border-radius: 12px;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-      background-color: #fff;
-      padding: 0;
-    }
+/* 読み取り結果表示 */
+#result {
+  font-weight: bold;
+  background-color: #e0f7fa;
+  padding: 0.8rem 1rem;
+  margin: 0 auto 1.5rem;
+  max-width: 480px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  word-break: break-word;
+}
 
-    #result {
-      font-weight: bold;
-      padding: 0.8rem;
-      background-color: #e0f7fa;
-      border-radius: 8px;
-      max-width: 90%;
-      margin: 0 auto 1.5rem;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      word-break: break-word;
-    }
+/* ボタン群 */
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  max-width: 320px;
+  margin: 1rem auto 3rem;
+}
 
-    .footer-area {
-      margin-top: 2rem;
-      padding-top: 2rem;
-      border-top: 2px solid #ccc;
-      overflow-x: auto;
-    }
+button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+}
 
-    table {
-      margin: 0 auto;
-      border-collapse: collapse;
-      width: 95%;
-      max-width: 800px;
-      background-color: #fff;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-    }
+button:hover {
+  background-color: #43a047;
+}
 
-    th, td {
-      padding: 10px;
-      border: 1px solid #ddd;
-    }
+button:active {
+  transform: scale(0.97);
+}
 
-    th {
-      background-color: #4caf50;
-      color: white;
-    }
+/* 完了ボタンは別色 */
+#completeSeatBtn {
+  background-color: #ff9800;
+}
 
-    .student {
-      display: inline-block;
-      background-color: #e3f2fd;
-      color: #1976d2;
-      padding: 4px 8px;
-      border-radius: 16px;
-      margin: 4px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: background-color 0.2s;
-      word-break: break-word;
-    }
+#completeSeatBtn:hover {
+  background-color: #fb8c00;
+}
 
-    .student:hover {
-      background-color: #bbdefb;
-    }
+/* テーブル全体 */
+table {
+  width: 95%;
+  max-width: 800px;
+  margin: 0 auto;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
 
-    .button-group {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-      margin: 1.5rem auto 3rem;
-      max-width: 320px;
-    }
+/* ヘッダーセル */
+th {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px;
+  text-align: left;
+}
 
-    button {
-      width: 100%;
-      padding: 0.8rem 1rem;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
-      background-color: #4caf50;
-      color: white;
-      cursor: pointer;
-      transition: background-color 0.2s, transform 0.1s;
-    }
+/* データセル */
+td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  vertical-align: middle;
+}
 
-    button:hover {
-      background-color: #43a047;
-    }
+/* 最終行の枠線消す */
+tbody tr:last-child td {
+  border-bottom: none;
+}
 
-    button:active {
-      transform: scale(0.97);
-    }
+/* 生徒ID表示のタグ */
+.student {
+  display: inline-block;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 8px;
+  border-radius: 16px;
+  margin: 4px 6px 4px 0;
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
 
-    #completeSeatBtn {
-      display: none;
-      background-color: #ff9800;
-    }
-
-    #completeSeatBtn:hover {
-      background-color: #fb8c00;
-    }
+.student:hover {
+  background-color: #bbdefb;
+}
   </style>
 </head>
 <body>
@@ -174,8 +170,7 @@
       <tbody></tbody>
     </table>
   </div>
-
-  <script>
+ <script>
     let currentSeat = null;
     let seatMap = {};
     let lastAction = null;
@@ -225,7 +220,6 @@
           csv += `${seat},${person}\n`;
         });
       }
-
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -302,17 +296,22 @@
       }
     }
 
-    const html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start(
-      { facingMode: "environment" },
-      {
-        fps: 15,
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.33
-      },
-      onScanSuccess
-    );
+    // ここからカメラ起動をDOM読み込み後に行う
+    document.addEventListener("DOMContentLoaded", () => {
+      const html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.start(
+        { facingMode: "environment" },
+        {
+          fps: 15,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.33
+        },
+        onScanSuccess
+      ).catch(err => {
+        console.error("カメラ起動エラー:", err);
+        document.getElementById("result").innerText = "カメラ起動に失敗しました: " + err;
+      });
+    });
   </script>
-
 </body>
 </html>
