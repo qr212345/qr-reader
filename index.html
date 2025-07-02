@@ -6,46 +6,115 @@
   <title>QRコードリーダー</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      margin: 2rem;
-    }
+/* ベース設定 */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  text-align: center;
+  margin: 2rem;
+  background-color: #f0f4f8;
+  color: #333;
+}
+
+/* タイトル・説明文 */
+h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+p {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 2rem;
+}
+
+/* QRリーダー表示部分 */
 #reader {
   width: 100%;
   max-width: 400px;
   aspect-ratio: 4 / 3;
-  margin: 0 auto 1rem;
+  margin: 0 auto 1.5rem;
   padding: 10px;
-  border: 2px solid #888;
+  border: 2px dashed #4caf50;
   border-radius: 12px;
-  background-color: #f9f9f9;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  background-color: #ffffff;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
 }
-    table {
-      margin: 1rem auto;
-      border-collapse: collapse;
-      width: 90%;
-      max-width: 500px;
-    }
-    th, td {
-      border: 1px solid #aaa;
-      padding: 8px;
-    }
-    button {
-      margin-top: 1rem;
-      margin-right: 0.5rem;
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-    }
-    #completeSeatBtn {
-      display: none;
-    }
-    .student {
-      margin: 0 5px;
-      color: blue;
-      cursor: pointer;
-    }
+
+/* 結果表示 */
+#result {
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  padding: 0.8rem;
+  background-color: #e0f7fa;
+  border-radius: 8px;
+  width: fit-content;
+  max-width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* 座席テーブル */
+table {
+  margin: 1.5rem auto;
+  border-collapse: collapse;
+  width: 95%;
+  max-width: 600px;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+th {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px;
+}
+td {
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+/* 生徒の表示と削除ボタン風の見た目 */
+.student {
+  display: inline-block;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 8px;
+  border-radius: 16px;
+  margin: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.student:hover {
+  background-color: #bbdefb;
+}
+
+/* ボタン共通 */
+button {
+  margin: 0.5rem 0.4rem;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #4caf50;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+button:hover {
+  background-color: #43a047;
+}
+button:active {
+  transform: scale(0.98);
+}
+#completeSeatBtn {
+  display: none;
+  background-color: #ff9800;
+}
+#completeSeatBtn:hover {
+  background-color: #fb8c00;
+}
   </style>
 </head>
 <body>
