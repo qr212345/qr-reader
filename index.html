@@ -201,12 +201,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       const html5QrCode = new Html5Qrcode("reader");
       html5QrCode.start(
-        { facingMode: "environment" },
-        {
-          fps: 15,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.33
-        },
+
         onScanSuccess
       ).catch(err => {
         console.error("カメラ起動エラー:", err);
