@@ -112,6 +112,23 @@
       background-color: #bbdefb;
     }
 
+    .seat {
+  display: inline-block;
+  background-color: #ffe0b2;
+  color: #e65100;
+  padding: 4px 8px;
+  border-radius: 16px;
+  margin: 4px 6px 4px 0;
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+
+.seat:hover {
+  background-color: #ffcc80;
+}
+
   </style>
 </head>
 <body>
@@ -202,21 +219,25 @@
       document.body.removeChild(a);
     }
 
-    function updateTable() {
-      const tbody = document.querySelector('#seatTable tbody');
-      tbody.innerHTML = '';
-      for (const [seat, people] of Object.entries(seatMap)) {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${seat}</td>
-          <td>${people.map(p =>
-            `<span class="student" onclick="removeStudent('${seat}', '${p}')">${p} ❌</span>`
-          ).join(' ')}</td>
-        `;
-        tbody.appendChild(row);
-      }
-      localStorage.setItem("seatMap", JSON.stringify(seatMap));
-    }
+function updateTable() {
+  const tbody = document.querySelector('#seatTable tbody');
+  tbody.innerHTML = '';
+  for (const [seat, people] of Object.entries(seatMap)) {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>
+        <span class="seat" onclick="removeSeat('${seat}')">${seat} ❌</span>
+      </td>
+      <td>
+        ${people.map(p =>
+          `<span class="student" onclick="removeStudent('${seat}', '${p}')">${p} ❌</span>`
+        ).join(' ')}
+      </td>
+    `;
+    tbody.appendChild(row);
+  }
+  localStorage.setItem("seatMap", JSON.stringify(seatMap));
+}
 
     function removeStudent(seat, person) {
       const people = seatMap[seat];
@@ -226,7 +247,13 @@
         document.getElementById("result").innerText = `座席「${seat}」から「${person}」を削除しました。`;
         updateTable();
       }
-    }
+  
+    function removeSeat(seat) {
+  if (confirm(`座席「${seat}」を削除しますか？（生徒も全て削除されます）`)) {
+    delete seatMap[seat];
+    document.getElementById("result").innerText = `座席「${seat}」を削除しました。`;
+    updateTable();
+  }
 
     function onScanSuccess(decodedText) {
       const now = Date.now();
