@@ -3,148 +3,151 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>QRコードリーダー（スマホで正方形映像＋枠）</title>
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script> 
+  <title>QRコードリーダー（削除機能付き）</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
-   /* 基本設定 */
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f0f4f8;
-  color: #333;
-  margin: 0;
-  padding: 1rem;
-  text-align: center;
-  overflow-x: hidden;
-}
-
-h1 {
-  font-size: 1.8rem;
-  margin-bottom: 0.5rem;
-}
-
-/* QRリーダー枠 */
-#reader-wrapper {
-  position: relative;
-  width: 100%;
-  max-width: 480px;
-  margin: 0 auto 1.5rem;
-  border: 2px dashed #4caf50;
-  border-radius: 12px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  background-color: #fff;
-  aspect-ratio: 4 / 3; /* PCは4:3 */
-}
-
-@media screen and (max-width: 480px) {
-  #reader-wrapper {
-    aspect-ratio: 1 / 1; /* スマホは正方形 */
-    max-width: 100vw;
+    <style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f8;
+    color: #333;
+    margin: 0;
+    padding: 1rem;
+    text-align: center;
+    overflow-x: hidden;
   }
-}
 
-/* カメラ映像 */
-#reader {
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* 読み取り枠（#reader-wrapper）を横長から通常、スマホは正方形に */
+  #reader-wrapper {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto 1.5rem;
+    border: 2px dashed #4caf50;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    background-color: #fff;
+    aspect-ratio: 4 / 3;  /* デフォルトは横長 */
+  }
+
+  @media screen and (max-width: 480px) {
+    #reader-wrapper {
+      aspect-ratio: 1 / 1;  /* スマホ以下は正方形 */
+    }
+  }
+
+ #reader {
   width: 100%;
-  height: 100%;
+  height: 0;
+  padding-bottom: 100%; /* 横幅に対して高さを100%にする */
+  position: relative;
+  border: 2px solid limegreen; /* 緑色の枠線 */
+  box-sizing: border-box;
   border-radius: 12px;
   overflow: hidden;
 }
+    
+    #result {
+      font-weight: bold;
+      background-color: #e0f7fa;
+      padding: 0.8rem 1rem;
+      margin: 0 auto 1.5rem;
+      max-width: 480px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      word-break: break-word;
+    }
 
-/* 読み取り結果表示 */
-#result {
-  font-weight: bold;
-  background-color: #e0f7fa;
-  padding: 0.8rem 1rem;
-  margin: 0 auto 1.5rem;
-  max-width: 480px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  word-break: break-word;
-}
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      max-width: 320px;
+      margin: 1rem auto 3rem;
+    }
 
-/* ボタン群 */
-.button-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  max-width: 320px;
-  margin: 1rem auto 3rem;
-}
+    button {
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.8rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.1s ease;
+    }
 
-button {
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.8rem 1rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s ease;
-}
+    button:hover {
+      background-color: #43a047;
+    }
 
-button:hover {
-  background-color: #43a047;
-}
+    button:active {
+      transform: scale(0.97);
+    }
 
-button:active {
-  transform: scale(0.97);
-}
+    #completeSeatBtn {
+      background-color: #ff9800;
+    }
 
-/* 座席完了ボタンだけ色を変える */
-#completeSeatBtn {
-  background-color: #ff9800;
-}
+    #completeSeatBtn:hover {
+      background-color: #fb8c00;
+    }
 
-#completeSeatBtn:hover {
-  background-color: #fb8c00;
-}
+    table {
+      width: 95%;
+      max-width: 800px;
+      margin: 0 auto;
+      border-collapse: collapse;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
 
-/* 座席登録テーブル */
-table {
-  width: 95%;
-  max-width: 800px;
-  margin: 0 auto;
-  border-collapse: collapse;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
+    th {
+      background-color: #4caf50;
+      color: white;
+      padding: 10px;
+      text-align: left;
+    }
 
-th {
-  background-color: #4caf50;
-  color: white;
-  padding: 10px;
-  text-align: left;
-}
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      vertical-align: middle;
+    }
 
-td {
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-  vertical-align: middle;
-}
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
 
-tbody tr:last-child td {
-  border-bottom: none;
-}
+    .student {
+      display: inline-block;
+      background-color: #e3f2fd;
+      color: #1976d2;
+      padding: 4px 8px;
+      border-radius: 16px;
+      margin: 4px 6px 4px 0;
+      font-size: 0.9rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s ease;
+    }
 
-/* 生徒IDのタグ風 */
-.student {
-  display: inline-block;
-  background-color: #e3f2fd;
-  color: #1976d2;
-  padding: 4px 8px;
-  border-radius: 16px;
-  margin: 4px 6px 4px 0;
-  font-size: 0.9rem;
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.2s ease;
-}
+    .student:hover {
+      background-color: #bbdefb;
+    }
 
-.student:hover {
-  background-color: #bbdefb;
-}
+    /* ✅ スマホ向けの読み取り枠調整（正方形に） */
+    @media screen and (max-width: 480px) {
+      #reader-wrapper {
+        aspect-ratio: 1 / 1;
+      }
+    }
   </style>
 </head>
 <body>
@@ -160,7 +163,7 @@ tbody tr:last-child td {
 
   <div class="button-group">
     <button onclick="downloadCSV()">CSVで保存</button>
-    <button id="completeSeatBtn" onclick="completeCurrentSeat()" style="display:none;">この座席の登録を完了</button>
+    <button id="completeSeatBtn" onclick="completeCurrentSeat()">この座席の登録を完了</button>
     <button onclick="undoLast()">最後の追加を取り消す</button>
     <button onclick="clearSavedData()">🗑 保存データを削除</button>
   </div>
@@ -240,11 +243,12 @@ tbody tr:last-child td {
       tbody.innerHTML = '';
       for (const [seat, people] of Object.entries(seatMap)) {
         const row = document.createElement('tr');
-        row.innerHTML = 
-          `<td>${seat}</td>
+        row.innerHTML = `
+          <td>${seat}</td>
           <td>${people.map(p =>
             `<span class="student" onclick="removeStudent('${seat}', '${p}')">${p} ❌</span>`
-          ).join(' ')}</td>`;
+          ).join(' ')}</td>
+        `;
         tbody.appendChild(row);
       }
       localStorage.setItem("seatMap", JSON.stringify(seatMap));
@@ -262,7 +266,7 @@ tbody tr:last-child td {
 
     function onScanSuccess(decodedText) {
       const now = Date.now();
-      if (now - lastScanTime < 3000) return; // 3秒以内の連続スキャンを無視
+      if (now - lastScanTime < 3000) return; // 1秒以内の連続スキャンを無視
       lastScanTime = now;
 
       if (!decodedText.startsWith("table") && !decodedText.startsWith("player")) {
@@ -300,26 +304,18 @@ tbody tr:last-child td {
       }
     }
 
-    const html5QrCode = new Html5Qrcode("reader");
-
-    window.addEventListener('resize', () => {
-      // 何もしない（キャンバス削除したため）
-    });
-
-    window.addEventListener('load', () => {
+    document.addEventListener("DOMContentLoaded", () => {
+      const html5QrCode = new Html5Qrcode("reader");
       html5QrCode.start(
         { facingMode: "environment" },
         {
-          fps: 10,
-          qrbox: { width: 250, height: 250 }
+          fps: 15,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.33
         },
-        (decodedText, decodedResult) => {
-          onScanSuccess(decodedText);
-        },
-        (errorMessage) => {
-          // 読み取り失敗は無視
-        }
+        onScanSuccess
       ).catch(err => {
+        console.error("カメラ起動エラー:", err);
         document.getElementById("result").innerText = "カメラ起動に失敗しました: " + err;
       });
     });
