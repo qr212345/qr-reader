@@ -20,121 +20,120 @@
     font-size: 1.8rem;
     margin-bottom: 0.5rem;
   }
-    
-    #result {
-      font-weight: bold;
-      background-color: #e0f7fa;
-      padding: 0.8rem 1rem;
-      margin: 0 auto 1.5rem;
-      max-width: 480px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      word-break: break-word;
-    }
 
-    .button-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-      max-width: 320px;
-      margin: 1rem auto 3rem;
-    }
+  #result {
+    font-weight: bold;
+    background-color: #e0f7fa;
+    padding: 0.8rem 1rem;
+    margin: 0 auto 1.5rem;
+    max-width: 480px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    word-break: break-word;
+  }
 
-    button {
-      background-color: #4caf50;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 0.8rem 1rem;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.1s ease;
-    }
+  .button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    max-width: 320px;
+    margin: 1rem auto 3rem;
+  }
 
-    button:hover {
-      background-color: #43a047;
-    }
+  button {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+  }
 
-    button:active {
-      transform: scale(0.97);
-    }
+  button:hover {
+    background-color: #43a047;
+  }
 
-    #completeSeatBtn {
-      background-color: #ff9800;
-    }
+  button:active {
+    transform: scale(0.97);
+  }
 
-    #completeSeatBtn:hover {
-      background-color: #fb8c00;
-    }
+  #completeSeatBtn {
+    background-color: #ff9800;
+  }
 
-    table {
-      width: 95%;
-      max-width: 800px;
-      margin: 0 auto;
-      border-collapse: collapse;
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
+  #completeSeatBtn:hover {
+    background-color: #fb8c00;
+  }
 
-    th {
-      background-color: #4caf50;
-      color: white;
-      padding: 10px;
-      text-align: left;
-    }
+  table {
+    width: 95%;
+    max-width: 800px;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
 
-    td {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-      vertical-align: middle;
-    }
+  th {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px;
+    text-align: left;
+  }
 
-    tbody tr:last-child td {
-      border-bottom: none;
-    }
+  td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    vertical-align: middle;
+  }
 
-    .student {
-      display: inline-block;
-      background-color: #e3f2fd;
-      color: #1976d2;
-      padding: 4px 8px;
-      border-radius: 16px;
-      margin: 4px 6px 4px 0;
-      font-size: 0.9rem;
-      cursor: pointer;
-      user-select: none;
-      transition: background-color 0.2s ease;
-    }
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
 
-    .student:hover {
-      background-color: #bbdefb;
-    }
+  .student {
+    display: inline-block;
+    background-color: #e3f2fd;
+    color: #1976d2;
+    padding: 4px 8px;
+    border-radius: 16px;
+    margin: 4px 6px 4px 0;
+    font-size: 0.9rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+  }
 
-    .seat {
-  display: inline-block;
-  background-color: #ffe0b2;
-  color: #e65100;
-  padding: 4px 8px;
-  border-radius: 16px;
-  margin: 4px 6px 4px 0;
-  font-size: 0.9rem;
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.2s ease;
-}
+  .student:hover {
+    background-color: #bbdefb;
+  }
 
-.seat:hover {
-  background-color: #ffcc80;
-}
+  .seat {
+    display: inline-block;
+    background-color: #ffe0b2;
+    color: #e65100;
+    padding: 4px 8px;
+    border-radius: 16px;
+    margin: 4px 6px 4px 0;
+    font-size: 0.9rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+  }
 
+  .seat:hover {
+    background-color: #ffcc80;
+  }
   </style>
 </head>
 <body>
 
   <h1>QRコードリーダー</h1>
-  <p>座席（table〜）→ 生徒（player〜）の順に読み取り。6人まで登録。生徒IDをクリックで削除。</p>
+  <p>座席（table〜）→ 生徒（player〜）の順に読み取り。6人まで登録。生徒や座席をクリックで削除。</p>
 
   <div id="reader-wrapper">
     <div id="reader"></div>
@@ -219,25 +218,21 @@
       document.body.removeChild(a);
     }
 
-function updateTable() {
-  const tbody = document.querySelector('#seatTable tbody');
-  tbody.innerHTML = '';
-  for (const [seat, people] of Object.entries(seatMap)) {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>
-        <span class="seat" onclick="removeSeat('${seat}')">${seat} ❌</span>
-      </td>
-      <td>
-        ${people.map(p =>
-          `<span class="student" onclick="removeStudent('${seat}', '${p}')">${p} ❌</span>`
-        ).join(' ')}
-      </td>
-    `;
-    tbody.appendChild(row);
-  }
-  localStorage.setItem("seatMap", JSON.stringify(seatMap));
-}
+    function updateTable() {
+      const tbody = document.querySelector('#seatTable tbody');
+      tbody.innerHTML = '';
+      for (const [seat, people] of Object.entries(seatMap)) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><span class="seat" onclick="removeSeat('${seat}')">${seat} ❌</span></td>
+          <td>${people.map(p =>
+            `<span class="student" onclick="removeStudent('${seat}', '${p}')">${p} ❌</span>`
+          ).join(' ')}</td>
+        `;
+        tbody.appendChild(row);
+      }
+      localStorage.setItem("seatMap", JSON.stringify(seatMap));
+    }
 
     function removeStudent(seat, person) {
       const people = seatMap[seat];
@@ -247,17 +242,19 @@ function updateTable() {
         document.getElementById("result").innerText = `座席「${seat}」から「${person}」を削除しました。`;
         updateTable();
       }
-  
+    }
+
     function removeSeat(seat) {
-  if (confirm(`座席「${seat}」を削除しますか？（生徒も全て削除されます）`)) {
-    delete seatMap[seat];
-    document.getElementById("result").innerText = `座席「${seat}」を削除しました。`;
-    updateTable();
-  }
+      if (confirm(`座席「${seat}」を削除しますか？（生徒もすべて削除されます）`)) {
+        delete seatMap[seat];
+        document.getElementById("result").innerText = `座席「${seat}」を削除しました。`;
+        updateTable();
+      }
+    }
 
     function onScanSuccess(decodedText) {
       const now = Date.now();
-      if (now - lastScanTime < 3000) return; // 1秒以内の連続スキャンを無視
+      if (now - lastScanTime < 3000) return;
       lastScanTime = now;
 
       if (!decodedText.startsWith("table") && !decodedText.startsWith("player")) {
