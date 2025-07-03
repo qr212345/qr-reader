@@ -22,23 +22,6 @@
     margin-bottom: 0.5rem;
   }
 
-  /* 読み取り枠（#reader-wrapper）を横長から通常、スマホは正方形に */
-  #reader-wrapper {
-    width: 100%;
-    max-width: 480px;
-    margin: 0 auto 1.5rem;
-    border: 2px dashed #4caf50;
-    border-radius: 12px;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-    background-color: #fff;
-    aspect-ratio: 4 / 3;  /* デフォルトは横長 */
-  }
-
-  @media screen and (max-width: 480px) {
-    #reader-wrapper {
-      aspect-ratio: 1 / 1;  /* スマホ以下は正方形 */
-    }
-  }
 
  #reader {
   width: 100%;
@@ -142,12 +125,6 @@
       background-color: #bbdefb;
     }
 
-    /* ✅ スマホ向けの読み取り枠調整（正方形に） */
-    @media screen and (max-width: 480px) {
-      #reader-wrapper {
-        aspect-ratio: 1 / 1;
-      }
-    }
   </style>
 </head>
 <body>
