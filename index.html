@@ -213,6 +213,23 @@ async function loadSeatMapFromDrive() {
   }
 }
 
+async function saveSeatMapToDrive() {
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(seatMap),
+    });
+    if (!res.ok) throw new Error("保存に失敗しました");
+    const text = await res.text();
+    displayMessage("💾 Google Driveに保存しました: " + text);
+  } catch (e) {
+    displayMessage("❌ 保存に失敗しました: " + e.message);
+    console.error(e);
+  }
+}
+
+    
   function completeCurrentSeat() {
     if (currentSeat) {
       displayMessage(`座席「${currentSeat}」の登録を完了しました。`);
