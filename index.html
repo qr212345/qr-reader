@@ -167,7 +167,7 @@
 
   let currentSeat = null;
   let seatMap = {};
-  let lastAction = null;
+  let actionHistory = [];
   let lastScanTime = 0;
 
   // ローカル保存から復元
@@ -224,14 +224,19 @@
   }
 
   function undoLast() {
-    if (lastAction) {
-      const { seat, person } = lastAction;
-      const people = seatMap[seat];
-      if (people && people[people.length - 1] === person) {
-        people.pop();
-        displayMessage(`「${person}」の登録を取り消しました。`);
-        lastAction = null;
-        updateTable();
+    if (actionHistory.length === 0) {
+    displayMessage("これ以上取り消せる操作はありません。");
+    return;
+  }
+
+  const { seat, person } = actionHistory.pop();
+  const people = seatMap[seat];
+  if (people) {
+    const index = people.lastIndexOf(person);
+    if (index !== -1) {
+      people.splice(index, 1);
+      displayMessage(`「${person}」の登録を取り消しました。`);
+      updateTable();
       }
     }
   }
@@ -325,7 +330,7 @@
         displayMessage(`「${decodedText}」は既に座席「${currentSeat}」に登録されています。`);
       } else {
         people.push(decodedText);
-        lastAction = { seat: currentSeat, person: decodedText };
+        actionHistory.push({ seat: currentSeat, person: decodedText });
         displayMessage(`「${decodedText}」を座席「${currentSeat}」に登録（${people.length}/6）`);
         if (people.length >= 6) {
           displayMessage("上限に達しました。");
