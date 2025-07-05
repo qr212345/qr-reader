@@ -242,6 +242,29 @@ function doPost(e) {
   }
 }
 
+function saveSeatMapToDrive() {
+  // seatMap を送信する（JSON形式）
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify(seatMap),
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+  .then(res => res.text())
+  .then(text => {
+    if (text.includes("saved")) {
+      displayMessage("✅ Google Driveに保存しました！");
+    } else {
+      displayMessage("❌ 保存に失敗しました: " + text);
+    }
+  })
+  .catch(err => {
+    console.error("保存エラー:", err);
+    displayMessage("❌ 保存エラーが発生しました");
+  });
+}
+    
   function completeCurrentSeat() {
     if (currentSeat) {
       displayMessage(`座席「${currentSeat}」の登録を完了しました。`);
