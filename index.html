@@ -161,6 +161,7 @@
       <tbody></tbody>
     </table>
   </div>
+
   <script>
   const API_URL = "https://script.google.com/macros/s/AKfycbyGEh-J1au9L_-nYDKDnOLgmNdq3_nFWKWSOWMJWs62U-_xqXrVdgdkFi2XusLClk7H/exec";
 
@@ -186,7 +187,7 @@
 
   async function loadSeatMapFromDrive() {
     try {
-      const res = await fetch(https://script.google.com/macros/s/AKfycbyGEh-J1au9L_-nYDKDnOLgmNdq3_nFWKWSOWMJWs62U-_xqXrVdgdkFi2XusLClk7H/exec);
+      const res = await fetch("https://script.google.com/macros/s/AKfycbyGEh-J1au9L_-nYDKDnOLgmNdq3_nFWKWSOWMJWs62U-_xqXrVdgdkFi2XusLClk7H/exec");
       if (!res.ok) throw new Error("読み込み失敗");
       seatMap = await res.json();
       displayMessage("☁ Google Driveからデータを復元しました");
