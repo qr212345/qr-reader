@@ -125,11 +125,10 @@
      text-decoration: underline;
     }
 
-/* テーブル行ホバーで背景色を変える */
-     #seatTable tbody tr:hover {
+    /* テーブル行ホバーで背景色を変える */
+    #seatTable tbody tr:hover {
       background-color: #e8f5e9;
-     }
-    
+    }
   </style>
 </head>
 <body>
@@ -185,33 +184,49 @@
     if(el) el.innerText = msg;
   }
 
-// 初期読み込みは async/await で待つ例
-document.addEventListener("DOMContentLoaded", async () => {
-  const savedMap = localStorage.getItem("seatMap");
-  if (savedMap) {
-    seatMap = JSON.parse(savedMap);
-    displayMessage("📦 前回のデータを復元しました");
-    updateTable();
-  } else {
-    await loadSeatMapFromDrive();
+  async function loadSeatMapFromDrive() {
+    try {
+      const res = await fetch(API_URL);
+      if (!res.ok) throw new Error("読み込み失敗");
+      const json = await res.json();
+      seatMap = json;
+      updateTable();
+      displayMessage("☁ Google Driveから復元しました");
+      localStorage.setItem("seatMap", JSON.stringify(seatMap));
+    } catch (e) {
+      displayMessage("❌ Driveからの復元に失敗しました");
+      console.error(e);
+    }
   }
-  // 以降、QRコード読み取り開始など...
-});
 
-async function loadSeatMapFromDrive() {
-  try {
-    const res = await fetch(API_URL);
-    if (!res.ok) throw new Error("読み込み失敗");
-    const json = await res.json();
-    seatMap = json;
-    updateTable();
-    displayMessage("☁ Google Driveから復元しました");
-    localStorage.setItem("seatMap", JSON.stringify(seatMap));
-  } catch (e) {
-    displayMessage("❌ Driveからの復元に失敗しました");
-    console.error(e);
-  }
-}
+  // 初期読み込みは async/await で待つ例
+  document.addEventListener("DOMContentLoaded", async () => {
+    const savedMap = localStorage.getItem("seatMap");
+    if (savedMap) {
+      seatMap = JSON.parse(savedMap);
+      displayMessage("📦 前回のデータを復元しました");
+      updateTable();
+    } else {
+      await loadSeatMapFromDrive();
+    }
+
+    html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+      { facingMode: "environment" },
+      {
+        fps: 15,
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.33
+      },
+      onScanSuccess
+    ).catch(err => {
+      console.error("カメラ起動エラー:", err);
+      displayMessage("カメラ起動に失敗しました: " + err);
+    });
+
+    const btn = document.getElementById("completeSeatBtn");
+    if (btn) btn.style.display = "none";
+  });
 
   function completeCurrentSeat() {
     if (currentSeat) {
@@ -223,18 +238,18 @@ async function loadSeatMapFromDrive() {
   }
 
   function undoLast() {
-     if (actionHistory.length === 0) {
-    displayMessage("これ以上取り消せる操作はありません。");
-    return;
-  }
-  const { seat, person } = actionHistory.pop();
-  const people = seatMap[seat];
-  if (people) {
-    const index = people.lastIndexOf(person);
-    if (index !== -1) {
-      people.splice(index, 1);
-      displayMessage(`「${person}」の登録を取り消しました。`);
-      updateTable();
+    if (actionHistory.length === 0) {
+      displayMessage("これ以上取り消せる操作はありません。");
+      return;
+    }
+    const { seat, person } = actionHistory.pop();
+    const people = seatMap[seat];
+    if (people) {
+      const index = people.lastIndexOf(person);
+      if (index !== -1) {
+        people.splice(index, 1);
+        displayMessage(`「${person}」の登録を取り消しました。`);
+        updateTable();
       }
     }
   }
@@ -301,7 +316,7 @@ async function loadSeatMapFromDrive() {
 
   function onScanSuccess(decodedText) {
     const now = Date.now();
-    if (now - lastScanTime < 2000) return; // 3秒以内の連続スキャンを無視
+    if (now - lastScanTime < 2000) return; // 2秒以内の連続スキャンを無視
     lastScanTime = now;
 
     if (!/^(table|player)/.test(decodedText)) {
@@ -340,7 +355,7 @@ async function loadSeatMapFromDrive() {
     }
   }
 
-  let html5QrCode; 
+  let html5QrCode;
     
 document.addEventListener("DOMContentLoaded", async () => {
   const savedMap = localStorage.getItem("seatMap");
