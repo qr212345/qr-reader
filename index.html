@@ -213,7 +213,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 以降、QRコード読み取り開始など...
 });
 
-
 async function loadSeatMapFromDrive() {
   try {
     const res = await fetch(API_URL);
@@ -228,7 +227,6 @@ async function loadSeatMapFromDrive() {
     console.error(e);
   }
 }
-
 
   function completeCurrentSeat() {
     if (currentSeat) {
@@ -359,23 +357,34 @@ async function loadSeatMapFromDrive() {
 
   let html5QrCode; 
     
-  document.addEventListener("DOMContentLoaded", () => {
-    html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start(
-      { facingMode: "environment" },
-      {
-        fps: 15,
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.33
-      },
-      onScanSuccess
-    ).catch(err => {
-      console.error("カメラ起動エラー:", err);
-      displayMessage("カメラ起動に失敗しました: " + err);
-    });
-    const btn = document.getElementById("completeSeatBtn");
-  if (btn) btn.style.display = "none";
+document.addEventListener("DOMContentLoaded", async () => {
+  const savedMap = localStorage.getItem("seatMap");
+  if (savedMap) {
+    seatMap = JSON.parse(savedMap);
+    displayMessage("📦 前回のデータを復元しました");
+    updateTable();
+  } else {
+    await loadSeatMapFromDrive();
+  }
+
+  html5QrCode = new Html5Qrcode("reader");
+  html5QrCode.start(
+    { facingMode: "environment" },
+    {
+      fps: 15,
+      qrbox: { width: 250, height: 250 },
+      aspectRatio: 1.33
+    },
+    onScanSuccess
+  ).catch(err => {
+    console.error("カメラ起動エラー:", err);
+    displayMessage("カメラ起動に失敗しました: " + err);
   });
+
+  const btn = document.getElementById("completeSeatBtn");
+  if (btn) btn.style.display = "none";
+});
+  
 </script>
 
 </body>
