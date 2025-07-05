@@ -6,7 +6,6 @@
   <title>QRコードリーダー（削除機能付き）</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
-    <style>
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f0f4f8;
@@ -22,35 +21,6 @@
     margin-bottom: 0.5rem;
   }
 
-  /* 読み取り枠（#reader-wrapper）を横長から通常、スマホは正方形に */
-  #reader-wrapper {
-    width: 100%;
-    max-width: 480px;
-    margin: 0 auto 1.5rem;
-    border: 2px dashed #4caf50;
-    border-radius: 12px;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-    background-color: #fff;
-    aspect-ratio: 4 / 3;  /* デフォルトは横長 */
-  }
-
-  @media screen and (max-width: 480px) {
-    #reader-wrapper {
-      aspect-ratio: 1 / 1;  /* スマホ以下は正方形 */
-    }
-  }
-
- #reader {
-  width: 100%;
-  height: 0;
-  padding-bottom: 100%; /* 横幅に対して高さを100%にする */
-  position: relative;
-  border: 2px solid limegreen; /* 緑色の枠線 */
-  box-sizing: border-box;
-  border-radius: 12px;
-  overflow: hidden;
-}
-    
     #result {
       font-weight: bold;
       background-color: #e0f7fa;
@@ -142,12 +112,24 @@
       background-color: #bbdefb;
     }
 
-    /* ✅ スマホ向けの読み取り枠調整（正方形に） */
-    @media screen and (max-width: 480px) {
-      #reader-wrapper {
-        aspect-ratio: 1 / 1;
-      }
+    /* 座席IDをクリックできるように */
+    .seat {
+     cursor: pointer;
+     color: #d32f2f;
+     font-weight: bold;
+     user-select: none;
+     transition: color 0.3s ease;
     }
+    .seat:hover {
+     color: #b71c1c;
+     text-decoration: underline;
+    }
+
+/* テーブル行ホバーで背景色を変える */
+     #seatTable tbody tr:hover {
+      background-color: #e8f5e9;
+     }
+    
   </style>
 </head>
 <body>
@@ -166,6 +148,8 @@
     <button id="completeSeatBtn" onclick="completeCurrentSeat()">この座席の登録を完了</button>
     <button onclick="undoLast()">最後の追加を取り消す</button>
     <button onclick="clearSavedData()">🗑 保存データを削除</button>
+    <button onclick="saveSeatMapToDrive()">💾 Google Driveに保存</button>
+    <button onclick="loadSeatMapFromDrive()">☁ Driveから復元</button>
   </div>
 
   <div class="footer-area">
@@ -177,149 +161,196 @@
       <tbody></tbody>
     </table>
   </div>
+  const API_URL = "https://script.google.com/macros/s/AKfycbyGEh-J1au9L_-nYDKDnOLgmNdq3_nFWKWSOWMJWs62U-_xqXrVdgdkFi2XusLClk7H/exec";
 
-  <script>
-    let currentSeat = null;
-    let seatMap = {};
-    let lastAction = null;
-    let lastScanTime = 0;
+  let currentSeat = null;
+  let seatMap = {};
+  let lastAction = null;
+  let lastScanTime = 0;
 
-    const savedMap = localStorage.getItem("seatMap");
-    if (savedMap) {
-      seatMap = JSON.parse(savedMap);
-      document.getElementById("result").innerText = "📦 前回のデータを復元しました";
+  // ローカル保存から復元
+  const savedMap = localStorage.getItem("seatMap");
+  if (savedMap) {
+    seatMap = JSON.parse(savedMap);
+    displayMessage("📦 前回のデータを復元しました");
+    updateTable();
+  } else {
+    loadSeatMapFromDrive(); // なければGoogle Driveから読み込み
+  }
+
+  function displayMessage(msg) {
+    const el = document.getElementById("result");
+    if(el) el.innerText = msg;
+  }
+
+  async function loadSeatMapFromDrive() {
+    try {
+      const res = await fetch(https://script.google.com/macros/s/AKfycbyGEh-J1au9L_-nYDKDnOLgmNdq3_nFWKWSOWMJWs62U-_xqXrVdgdkFi2XusLClk7H/exec);
+      if (!res.ok) throw new Error("読み込み失敗");
+      seatMap = await res.json();
+      displayMessage("☁ Google Driveからデータを復元しました");
+      updateTable();
+      localStorage.setItem("seatMap", JSON.stringify(seatMap));
+    } catch (err) {
+      console.error(err);
+      displayMessage("❌ Driveからの復元に失敗しました");
+    }
+  }
+
+  async function saveSeatMapToDrive() {
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(seatMap)
+      });
+      if (!res.ok) throw new Error("保存失敗");
+      displayMessage("✅ Google Driveに保存しました");
+    } catch (err) {
+      console.error(err);
+      displayMessage("❌ Google Driveへの保存に失敗しました");
+    }
+  }
+
+  function completeCurrentSeat() {
+    if (currentSeat) {
+      displayMessage(`座席「${currentSeat}」の登録を完了しました。`);
+      currentSeat = null;
+      const btn = document.getElementById("completeSeatBtn");
+      if (btn) btn.style.display = "none";
+    }
+  }
+
+  function undoLast() {
+    if (lastAction) {
+      const { seat, person } = lastAction;
+      const people = seatMap[seat];
+      if (people && people[people.length - 1] === person) {
+        people.pop();
+        displayMessage(`「${person}」の登録を取り消しました。`);
+        lastAction = null;
+        updateTable();
+      }
+    }
+  }
+
+  function clearSavedData() {
+    if (confirm("保存データをすべて削除しますか？")) {
+      localStorage.removeItem("seatMap");
+      seatMap = {};
+      displayMessage("保存されたデータを削除しました。");
       updateTable();
     }
+  }
 
-    function completeCurrentSeat() {
-      if (currentSeat) {
-        document.getElementById("result").innerText = `座席「${currentSeat}」の登録を完了しました。`;
-        currentSeat = null;
-        document.getElementById("completeSeatBtn").style.display = "none";
-      }
+  function downloadCSV() {
+    let csv = "座席ID,生徒ID\n";
+    for (const [seat, people] of Object.entries(seatMap)) {
+      people.forEach(person => {
+        csv += `${seat},${person}\n`;
+      });
+    }
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "seat_assignment.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  function updateTable() {
+    const tbody = document.querySelector('#seatTable tbody');
+    tbody.innerHTML = '';
+    for (const [seat, people] of Object.entries(seatMap)) {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${seat} <span style="color:red; cursor:pointer;" onclick="removeSeat('${seat}')">❌</span></td>
+        <td>${people.map(p =>
+          `<span class="student" onclick="removeStudent('${seat}', '${p}')">${p} ❌</span>`
+        ).join(' ')}</td>
+      `;
+      tbody.appendChild(row);
+    }
+    localStorage.setItem("seatMap", JSON.stringify(seatMap));
+  }
+
+  function removeStudent(seat, person) {
+    const people = seatMap[seat];
+    const index = people.indexOf(person);
+    if (index !== -1) {
+      people.splice(index, 1);
+      displayMessage(`座席「${seat}」から「${person}」を削除しました。`);
+      updateTable();
+    }
+  }
+
+  function removeSeat(seat) {
+    if (confirm(`座席「${seat}」を削除しますか？（生徒もすべて削除されます）`)) {
+      delete seatMap[seat];
+      displayMessage(`座席「${seat}」を削除しました。`);
+      updateTable();
+    }
+  }
+
+  function onScanSuccess(decodedText) {
+    const now = Date.now();
+    if (now - lastScanTime < 3000) return; // 3秒以内の連続スキャンを無視
+    lastScanTime = now;
+
+    if (!decodedText.startsWith("table") && !decodedText.startsWith("player")) {
+      displayMessage("QRコードは 'table' または 'player' で始めてください。");
+      return;
     }
 
-    function undoLast() {
-      if (lastAction) {
-        const { seat, person } = lastAction;
-        const people = seatMap[seat];
-        if (people && people[people.length - 1] === person) {
-          people.pop();
-          document.getElementById("result").innerText = `「${person}」の登録を取り消しました。`;
-          lastAction = null;
-          updateTable();
-        }
-      }
-    }
-
-    function clearSavedData() {
-      if (confirm("保存データをすべて削除しますか？")) {
-        localStorage.removeItem("seatMap");
-        seatMap = {};
-        document.getElementById("result").innerText = "保存されたデータを削除しました。";
-        updateTable();
-      }
-    }
-
-    function downloadCSV() {
-      let csv = "座席ID,生徒ID\n";
-      for (const [seat, people] of Object.entries(seatMap)) {
-        people.forEach(person => {
-          csv += `${seat},${person}\n`;
-        });
-      }
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "seat_assignment.csv";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-
-    function updateTable() {
-      const tbody = document.querySelector('#seatTable tbody');
-      tbody.innerHTML = '';
-      for (const [seat, people] of Object.entries(seatMap)) {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${seat}</td>
-          <td>${people.map(p =>
-            <span class="student" onclick="removeStudent('${seat}', '${p}')">${p} ❌</span>
-          ).join(' ')}</td>
-        `;
-        tbody.appendChild(row);
-      }
-      localStorage.setItem("seatMap", JSON.stringify(seatMap));
-    }
-
-    function removeStudent(seat, person) {
-      const people = seatMap[seat];
-      const index = people.indexOf(person);
-      if (index !== -1) {
-        people.splice(index, 1);
-        document.getElementById("result").innerText = `座席「${seat}」から「${person}」を削除しました。`;
-        updateTable();
-      }
-    }
-
-    function onScanSuccess(decodedText) {
-      const now = Date.now();
-      if (now - lastScanTime < 3000) return; // 1秒以内の連続スキャンを無視
-      lastScanTime = now;
-
-      if (!decodedText.startsWith("table") && !decodedText.startsWith("player")) {
-        document.getElementById("result").innerText = "QRコードは 'table' または 'player' で始めてください。";
+    if (decodedText.startsWith("table")) {
+      currentSeat = decodedText;
+      if (!seatMap[currentSeat]) seatMap[currentSeat] = [];
+      displayMessage(`座席「${currentSeat}」を読み取りました。最大6人まで登録可能。`);
+      const btn = document.getElementById("completeSeatBtn");
+      if (btn) btn.style.display = "block";
+    } else if (decodedText.startsWith("player")) {
+      if (!currentSeat) {
+        displayMessage("最初に座席QR（table〜）を読み取ってください。");
         return;
       }
-
-      if (decodedText.startsWith("table")) {
-        currentSeat = decodedText;
-        if (!seatMap[currentSeat]) seatMap[currentSeat] = [];
-        document.getElementById("result").innerText = `座席「${currentSeat}」を読み取りました。最大6人まで登録可能。`;
-        document.getElementById("completeSeatBtn").style.display = "block";
-      } else if (decodedText.startsWith("player")) {
-        if (!currentSeat) {
-          document.getElementById("result").innerText = "最初に座席QR（table〜）を読み取ってください。";
-          return;
-        }
-        const people = seatMap[currentSeat];
+      const people = seatMap[currentSeat];
+      if (people.length >= 6) {
+        displayMessage(`座席「${currentSeat}」は6人までです。`);
+        completeCurrentSeat();
+      } else if (people.includes(decodedText)) {
+        displayMessage(`「${decodedText}」は既に座席「${currentSeat}」に登録されています。`);
+      } else {
+        people.push(decodedText);
+        lastAction = { seat: currentSeat, person: decodedText };
+        displayMessage(`「${decodedText}」を座席「${currentSeat}」に登録（${people.length}/6）`);
         if (people.length >= 6) {
-          document.getElementById("result").innerText = `座席「${currentSeat}」は6人までです。`;
+          displayMessage("上限に達しました。");
           completeCurrentSeat();
-        } else if (people.includes(decodedText)) {
-          document.getElementById("result").innerText = `「${decodedText}」は既に座席「${currentSeat}」に登録されています。`;
-        } else {
-          people.push(decodedText);
-          lastAction = { seat: currentSeat, person: decodedText };
-          document.getElementById("result").innerText = `「${decodedText}」を座席「${currentSeat}」に登録（${people.length}/6）`;
-          if (people.length >= 6) {
-            document.getElementById("result").innerText += " 上限に達しました。";
-            completeCurrentSeat();
-          }
-          localStorage.setItem("seatMap", JSON.stringify(seatMap));
-          updateTable();
         }
+        localStorage.setItem("seatMap", JSON.stringify(seatMap));
+        updateTable();
       }
     }
+  }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const html5QrCode = new Html5Qrcode("reader");
-      html5QrCode.start(
-        { facingMode: "environment" },
-        {
-          fps: 15,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.33
-        },
-        onScanSuccess
-      ).catch(err => {
-        console.error("カメラ起動エラー:", err);
-        document.getElementById("result").innerText = "カメラ起動に失敗しました: " + err;
-      });
+  document.addEventListener("DOMContentLoaded", () => {
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+      { facingMode: "environment" },
+      {
+        fps: 15,
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.33
+      },
+      onScanSuccess
+    ).catch(err => {
+      console.error("カメラ起動エラー:", err);
+      displayMessage("カメラ起動に失敗しました: " + err);
     });
-  </script>
+  });
+</script>
 
 </body>
 </html>
