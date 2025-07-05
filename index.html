@@ -199,18 +199,17 @@
     }
   }
 
-  async function saveSeatMapToDrive() {
+  async function loadSeatMapFromDrive() {
     try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(seatMap)
-      });
-      if (!res.ok) throw new Error("保存失敗");
-      displayMessage("✅ Google Driveに保存しました");
-    } catch (err) {
-      console.error(err);
-      displayMessage("❌ Google Driveへの保存に失敗しました" + err.message);
+       const res = await fetch(API_URL);
+       if (!res.ok) throw new Error("読み込み失敗");
+       seatMap = await res.json();
+       displayMessage("☁ Google Driveからデータを復元しました");
+       updateTable();
+       localStorage.setItem("seatMap", JSON.stringify(seatMap));
+     } catch (err) {
+       console.error(err);
+       displayMessage("❌ Driveからの復元に失敗しました: " + err.message);
     }
   }
 
