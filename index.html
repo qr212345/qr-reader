@@ -351,6 +351,8 @@
       console.error("カメラ起動エラー:", err);
       displayMessage("カメラ起動に失敗しました: " + err);
     });
+    const btn = document.getElementById("completeSeatBtn");
+  if (btn) btn.style.display = "none";
   });
 </script>
 
