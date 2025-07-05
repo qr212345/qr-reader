@@ -164,7 +164,7 @@
   </div>
 
   <script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbw-jPEIuT6nN0Q89GGghDueHbYkRW0Nh5X0gsRNCZHaULeiSJyo8xV6_2CES32N-nVt/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbyTxi9AHEaql2PpbrlnpFIW0jVzqD2jo_MEftHHYGQCSXPm5Dcqlz4UcZ_nQYHNDHdT/exec";
     
   let currentSeat = null;
   let seatMap = {};
@@ -244,13 +244,12 @@ function doPost(e) {
 }
 
 function saveSeatMapToDrive() {
-  // seatMap を送信する（JSON形式）
   fetch(API_URL, {
     method: "POST",
-    body: JSON.stringify(seatMap),
     headers: {
-      "Content-Type": "text/plain"
-    }
+      "Content-Type": "text/plain"  // プリフライトを避けるために text/plain を使用
+    },
+    body: JSON.stringify(seatMap)
   })
   .then(res => res.text())
   .then(text => {
@@ -264,6 +263,21 @@ function saveSeatMapToDrive() {
     console.error("保存エラー:", err);
     displayMessage("❌ 保存エラーが発生しました");
   });
+}
+
+async function loadSeatMapFromDrive() {
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error("読み込み失敗");
+    const json = await res.json();
+    seatMap = json;
+    updateTable();
+    displayMessage("☁ Google Driveから復元しました");
+    localStorage.setItem("seatMap", JSON.stringify(seatMap));
+  } catch (e) {
+    displayMessage("❌ Driveからの復元に失敗しました");
+    console.error(e);
+  }
 }
     
   function completeCurrentSeat() {
