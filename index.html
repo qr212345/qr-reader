@@ -216,19 +216,32 @@ async function loadSeatMapFromDrive() {
 function doPost(e) {
   let data;
   if (e.postData && e.postData.contents) {
-    data = JSON.parse(e.postData.contents);
+    try {
+      data = JSON.parse(e.postData.contents);
+    } catch (err) {
+      return ContentService.createTextOutput("invalid JSON")
+        .setMimeType(ContentService.MimeType.TEXT);
+    }
   } else if (e && e.parameter && Object.keys(e.parameter).length > 0) {
     // URLエンコードされたパラメータの場合
     data = e.parameter;
   } else {
     return ContentService.createTextOutput("invalid data")
-      .setMimeType(ContentService.MimeType.TEXT)
-      .setHeader("Access-Control-Allow-Origin", "*");
+      .setMimeType(ContentService.MimeType.TEXT);
   }
   
-  // dataを使って処理
+  // ここで data を使った処理（例：Google Driveに保存）
+  try {
+    const file = DriveApp.getFileById(FILE_ID);
+    file.setContent(JSON.stringify(data));
+    return ContentService.createTextOutput("saved")
+      .setMimeType(ContentService.MimeType.TEXT);
+  } catch (err) {
+    return ContentService.createTextOutput("save failed")
+      .setMimeType(ContentService.MimeType.TEXT);
+  }
 }
-   
+
   function completeCurrentSeat() {
     if (currentSeat) {
       displayMessage(`座席「${currentSeat}」の登録を完了しました。`);
