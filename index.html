@@ -301,8 +301,8 @@
     if (now - lastScanTime < 3000) return; // 3秒以内の連続スキャンを無視
     lastScanTime = now;
 
-    if (!decodedText.startsWith("table") && !decodedText.startsWith("player")) {
-      displayMessage("QRコードは 'table' または 'player' で始めてください。");
+    if (!/^table|player/.test(decodedText)) {
+      displayMessage("❗不正なQRコードです。'table〜' または 'player〜' で始めてください。");
       return;
     }
 
@@ -337,8 +337,10 @@
     }
   }
 
+  let html5QrCode; 
+    
   document.addEventListener("DOMContentLoaded", () => {
-    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode = new Html5Qrcode("reader");
     html5QrCode.start(
       { facingMode: "environment" },
       {
