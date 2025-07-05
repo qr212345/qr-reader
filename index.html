@@ -185,21 +185,34 @@
     if(el) el.innerText = msg;
   }
 
-async function saveSeatMapToDrive() {
+async function loadSeatMapFromDrive() {
   try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(seatMap),
-    });
-    if (!res.ok) throw new Error("保存に失敗しました");
-    const text = await res.text();
-    displayMessage("✅ Google Driveに保存しました");
-    console.log(text);
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error("読み込み失敗");
+    const json = await res.json();
+    seatMap = json;
+    updateTable();
+    displayMessage("☁ Google Driveから復元しました");
+    localStorage.setItem("seatMap", JSON.stringify(seatMap));
   } catch (e) {
-    displayMessage("❌ Google Driveへの保存に失敗しました: " + e.message);
+    displayMessage("❌ Driveからの復元に失敗しました");
+    console.error(e);
   }
 }
+
+// 初期読み込みは async/await で待つ例
+document.addEventListener("DOMContentLoaded", async () => {
+  const savedMap = localStorage.getItem("seatMap");
+  if (savedMap) {
+    seatMap = JSON.parse(savedMap);
+    displayMessage("📦 前回のデータを復元しました");
+    updateTable();
+  } else {
+    await loadSeatMapFromDrive();
+  }
+  // 以降、QRコード読み取り開始など...
+});
+
 
 async function loadSeatMapFromDrive() {
   try {
