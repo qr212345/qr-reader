@@ -185,21 +185,6 @@
     if(el) el.innerText = msg;
   }
 
-async function loadSeatMapFromDrive() {
-  try {
-    const res = await fetch(API_URL);
-    if (!res.ok) throw new Error("読み込み失敗");
-    const json = await res.json();
-    seatMap = json;
-    updateTable();
-    displayMessage("☁ Google Driveから復元しました");
-    localStorage.setItem("seatMap", JSON.stringify(seatMap));
-  } catch (e) {
-    displayMessage("❌ Driveからの復元に失敗しました");
-    console.error(e);
-  }
-}
-
 // 初期読み込みは async/await で待つ例
 document.addEventListener("DOMContentLoaded", async () => {
   const savedMap = localStorage.getItem("seatMap");
