@@ -5,14 +5,160 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>QRコードリーダー（削除機能付き）</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-  <script src="main.js" type="text/javascript"></script>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    <style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f8;
+    color: #333;
+    margin: 0;
+    padding: 1rem;
+    text-align: center;
+    overflow-x: hidden;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* 読み取り枠（#reader-wrapper）を横長から通常、スマホは正方形に */
+  #reader-wrapper {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto 1.5rem;
+    border: 2px dashed #4caf50;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    background-color: #fff;
+    aspect-ratio: 4 / 3;  /* デフォルトは横長 */
+  }
+
+  @media screen and (max-width: 480px) {
+    #reader-wrapper {
+      aspect-ratio: 1 / 1;  /* スマホ以下は正方形 */
+    }
+  }
+
+ #reader {
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%; /* 横幅に対して高さを100%にする */
+  position: relative;
+  border: 2px solid limegreen; /* 緑色の枠線 */
+  box-sizing: border-box;
+  border-radius: 12px;
+  overflow: hidden;
+}
+    
+    #result {
+      font-weight: bold;
+      background-color: #e0f7fa;
+      padding: 0.8rem 1rem;
+      margin: 0 auto 1.5rem;
+      max-width: 480px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      word-break: break-word;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      max-width: 320px;
+      margin: 1rem auto 3rem;
+    }
+
+    button {
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.8rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.1s ease;
+    }
+
+    button:hover {
+      background-color: #43a047;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    #completeSeatBtn {
+      background-color: #ff9800;
+    }
+
+    #completeSeatBtn:hover {
+      background-color: #fb8c00;
+    }
+
+    table {
+      width: 95%;
+      max-width: 800px;
+      margin: 0 auto;
+      border-collapse: collapse;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    th {
+      background-color: #4caf50;
+      color: white;
+      padding: 10px;
+      text-align: left;
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .student {
+      display: inline-block;
+      background-color: #e3f2fd;
+      color: #1976d2;
+      padding: 4px 8px;
+      border-radius: 16px;
+      margin: 4px 6px 4px 0;
+      font-size: 0.9rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s ease;
+    }
+
+    .student:hover {
+      background-color: #bbdefb;
+    }
+
+    /* ✅ スマホ向けの読み取り枠調整（正方形に） */
+    @media screen and (max-width: 480px) {
+      #reader-wrapper {
+        aspect-ratio: 1 / 1;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>QRコードリーダー</h1>
-  <p>座席（table〜）→ 生徒（player〜）の順に読み取り。6人まで登録。生徒や座席をクリックで削除。</p>
 
-  <div id="reader-wrapper"><div id="reader"></div></div>
+  <h1>QRコードリーダー</h1>
+  <p>座席（table〜）→ 生徒（player〜）の順に読み取り。6人まで登録。生徒IDをクリックで削除。</p>
+
+  <div id="reader-wrapper">
+    <div id="reader"></div>
+  </div>
+
   <div id="result">ここに読み取り結果が表示されます</div>
 
   <div class="button-group">
@@ -20,8 +166,6 @@
     <button id="completeSeatBtn" onclick="completeCurrentSeat()">この座席の登録を完了</button>
     <button onclick="undoLast()">最後の追加を取り消す</button>
     <button onclick="clearSavedData()">🗑 保存データを削除</button>
-    <button onclick="saveSeatMapToDrive()">☁ Google Driveに保存</button>
-    <button onclick="loadSeatMapFromDrive()">☁ Driveから復元</button>
   </div>
 
   <div class="footer-area">
@@ -34,6 +178,148 @@
     </table>
   </div>
 
-  <script src="main.js"></script>
+  <script>
+    let currentSeat = null;
+    let seatMap = {};
+    let lastAction = null;
+    let lastScanTime = 0;
+
+    const savedMap = localStorage.getItem("seatMap");
+    if (savedMap) {
+      seatMap = JSON.parse(savedMap);
+      document.getElementById("result").innerText = "📦 前回のデータを復元しました";
+      updateTable();
+    }
+
+    function completeCurrentSeat() {
+      if (currentSeat) {
+        document.getElementById("result").innerText = `座席「${currentSeat}」の登録を完了しました。`;
+        currentSeat = null;
+        document.getElementById("completeSeatBtn").style.display = "none";
+      }
+    }
+
+    function undoLast() {
+      if (lastAction) {
+        const { seat, person } = lastAction;
+        const people = seatMap[seat];
+        if (people && people[people.length - 1] === person) {
+          people.pop();
+          document.getElementById("result").innerText = `「${person}」の登録を取り消しました。`;
+          lastAction = null;
+          updateTable();
+        }
+      }
+    }
+
+    function clearSavedData() {
+      if (confirm("保存データをすべて削除しますか？")) {
+        localStorage.removeItem("seatMap");
+        seatMap = {};
+        document.getElementById("result").innerText = "保存されたデータを削除しました。";
+        updateTable();
+      }
+    }
+
+    function downloadCSV() {
+      let csv = "座席ID,生徒ID\n";
+      for (const [seat, people] of Object.entries(seatMap)) {
+        people.forEach(person => {
+          csv += `${seat},${person}\n`;
+        });
+      }
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "seat_assignment.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function updateTable() {
+      const tbody = document.querySelector('#seatTable tbody');
+      tbody.innerHTML = '';
+      for (const [seat, people] of Object.entries(seatMap)) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${seat}</td>
+          <td>${people.map(p =>
+            <span class="student" onclick="removeStudent('${seat}', '${p}')">${p} ❌</span>
+          ).join(' ')}</td>
+        `;
+        tbody.appendChild(row);
+      }
+      localStorage.setItem("seatMap", JSON.stringify(seatMap));
+    }
+
+    function removeStudent(seat, person) {
+      const people = seatMap[seat];
+      const index = people.indexOf(person);
+      if (index !== -1) {
+        people.splice(index, 1);
+        document.getElementById("result").innerText = `座席「${seat}」から「${person}」を削除しました。`;
+        updateTable();
+      }
+    }
+
+    function onScanSuccess(decodedText) {
+      const now = Date.now();
+      if (now - lastScanTime < 3000) return; // 1秒以内の連続スキャンを無視
+      lastScanTime = now;
+
+      if (!decodedText.startsWith("table") && !decodedText.startsWith("player")) {
+        document.getElementById("result").innerText = "QRコードは 'table' または 'player' で始めてください。";
+        return;
+      }
+
+      if (decodedText.startsWith("table")) {
+        currentSeat = decodedText;
+        if (!seatMap[currentSeat]) seatMap[currentSeat] = [];
+        document.getElementById("result").innerText = `座席「${currentSeat}」を読み取りました。最大6人まで登録可能。`;
+        document.getElementById("completeSeatBtn").style.display = "block";
+      } else if (decodedText.startsWith("player")) {
+        if (!currentSeat) {
+          document.getElementById("result").innerText = "最初に座席QR（table〜）を読み取ってください。";
+          return;
+        }
+        const people = seatMap[currentSeat];
+        if (people.length >= 6) {
+          document.getElementById("result").innerText = `座席「${currentSeat}」は6人までです。`;
+          completeCurrentSeat();
+        } else if (people.includes(decodedText)) {
+          document.getElementById("result").innerText = `「${decodedText}」は既に座席「${currentSeat}」に登録されています。`;
+        } else {
+          people.push(decodedText);
+          lastAction = { seat: currentSeat, person: decodedText };
+          document.getElementById("result").innerText = `「${decodedText}」を座席「${currentSeat}」に登録（${people.length}/6）`;
+          if (people.length >= 6) {
+            document.getElementById("result").innerText += " 上限に達しました。";
+            completeCurrentSeat();
+          }
+          localStorage.setItem("seatMap", JSON.stringify(seatMap));
+          updateTable();
+        }
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.start(
+        { facingMode: "environment" },
+        {
+          fps: 15,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.33
+        },
+        onScanSuccess
+      ).catch(err => {
+        console.error("カメラ起動エラー:", err);
+        document.getElementById("result").innerText = "カメラ起動に失敗しました: " + err;
+      });
+    });
+  </script>
+
 </body>
 </html>
