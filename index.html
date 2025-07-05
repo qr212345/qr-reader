@@ -187,7 +187,7 @@
 
   async function loadSeatMapFromDrive() {
     try {
-      const res = await fetch("https://script.google.com/macros/s/AKfycbyGEh-J1au9L_-nYDKDnOLgmNdq3_nFWKWSOWMJWs62U-_xqXrVdgdkFi2XusLClk7H/exec");
+      const res = await fetch(API_URL);
       if (!res.ok) throw new Error("読み込み失敗");
       seatMap = await res.json();
       displayMessage("☁ Google Driveからデータを復元しました");
@@ -224,11 +224,10 @@
   }
 
   function undoLast() {
-    if (actionHistory.length === 0) {
+     if (actionHistory.length === 0) {
     displayMessage("これ以上取り消せる操作はありません。");
     return;
   }
-
   const { seat, person } = actionHistory.pop();
   const people = seatMap[seat];
   if (people) {
