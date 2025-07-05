@@ -125,10 +125,11 @@
      text-decoration: underline;
     }
 
-    /* テーブル行ホバーで背景色を変える */
-    #seatTable tbody tr:hover {
+/* テーブル行ホバーで背景色を変える */
+     #seatTable tbody tr:hover {
       background-color: #e8f5e9;
-    }
+     }
+    
   </style>
 </head>
 <body>
@@ -162,7 +163,7 @@
   </div>
 
   <script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbx3AySWrefHX7FF0pSeQ7jSMOgm6vb7K3ITKEE7N4q_IRpgtCpLe3G47sh8ZXimk8d2/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbzebEocPj-hHcCS5nRd_BfGeHUiLkaxP_mAaZOIvwt10Mln_Z2rfuAT9zWNNEYNKh9q/exec";
 
   let currentSeat = null;
   let seatMap = {};
@@ -184,49 +185,33 @@
     if(el) el.innerText = msg;
   }
 
-  async function loadSeatMapFromDrive() {
-    try {
-      const res = await fetch(API_URL);
-      if (!res.ok) throw new Error("読み込み失敗");
-      const json = await res.json();
-      seatMap = json;
-      updateTable();
-      displayMessage("☁ Google Driveから復元しました");
-      localStorage.setItem("seatMap", JSON.stringify(seatMap));
-    } catch (e) {
-      displayMessage("❌ Driveからの復元に失敗しました");
-      console.error(e);
-    }
+// 初期読み込みは async/await で待つ例
+document.addEventListener("DOMContentLoaded", async () => {
+  const savedMap = localStorage.getItem("seatMap");
+  if (savedMap) {
+    seatMap = JSON.parse(savedMap);
+    displayMessage("📦 前回のデータを復元しました");
+    updateTable();
+  } else {
+    await loadSeatMapFromDrive();
   }
+  // 以降、QRコード読み取り開始など...
+});
 
-  // 初期読み込みは async/await で待つ例
-  document.addEventListener("DOMContentLoaded", async () => {
-    const savedMap = localStorage.getItem("seatMap");
-    if (savedMap) {
-      seatMap = JSON.parse(savedMap);
-      displayMessage("📦 前回のデータを復元しました");
-      updateTable();
-    } else {
-      await loadSeatMapFromDrive();
-    }
-
-    html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start(
-      { facingMode: "environment" },
-      {
-        fps: 15,
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.33
-      },
-      onScanSuccess
-    ).catch(err => {
-      console.error("カメラ起動エラー:", err);
-      displayMessage("カメラ起動に失敗しました: " + err);
-    });
-
-    const btn = document.getElementById("completeSeatBtn");
-    if (btn) btn.style.display = "none";
-  });
+async function loadSeatMapFromDrive() {
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error("読み込み失敗");
+    const json = await res.json();
+    seatMap = json;
+    updateTable();
+    displayMessage("☁ Google Driveから復元しました");
+    localStorage.setItem("seatMap", JSON.stringify(seatMap));
+  } catch (e) {
+    displayMessage("❌ Driveからの復元に失敗しました");
+    console.error(e);
+  }
+}
 
   function completeCurrentSeat() {
     if (currentSeat) {
@@ -238,18 +223,18 @@
   }
 
   function undoLast() {
-    if (actionHistory.length === 0) {
-      displayMessage("これ以上取り消せる操作はありません。");
-      return;
-    }
-    const { seat, person } = actionHistory.pop();
-    const people = seatMap[seat];
-    if (people) {
-      const index = people.lastIndexOf(person);
-      if (index !== -1) {
-        people.splice(index, 1);
-        displayMessage(`「${person}」の登録を取り消しました。`);
-        updateTable();
+     if (actionHistory.length === 0) {
+    displayMessage("これ以上取り消せる操作はありません。");
+    return;
+  }
+  const { seat, person } = actionHistory.pop();
+  const people = seatMap[seat];
+  if (people) {
+    const index = people.lastIndexOf(person);
+    if (index !== -1) {
+      people.splice(index, 1);
+      displayMessage(`「${person}」の登録を取り消しました。`);
+      updateTable();
       }
     }
   }
@@ -316,7 +301,7 @@
 
   function onScanSuccess(decodedText) {
     const now = Date.now();
-    if (now - lastScanTime < 2000) return; // 2秒以内の連続スキャンを無視
+    if (now - lastScanTime < 2000) return; // 3秒以内の連続スキャンを無視
     lastScanTime = now;
 
     if (!/^(table|player)/.test(decodedText)) {
@@ -355,7 +340,7 @@
     }
   }
 
-  let html5QrCode;
+  let html5QrCode; 
     
 document.addEventListener("DOMContentLoaded", async () => {
   const savedMap = localStorage.getItem("seatMap");
