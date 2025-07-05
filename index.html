@@ -163,7 +163,7 @@
   </div>
 
   <script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbw-CePQdntKPw5N4dkX5YJMPO8GZz_nPS-C2af0-zPGsHsz1KxT1b40IN08ydVllBwD/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbz6c6aOQY-JgAO2RIUQ-rWPaazslZSph5aAtAyG0KBsvRkStWQh_6SQN03CIzAB9bNs/exec";
 
   let currentSeat = null;
   let seatMap = {};
@@ -210,7 +210,7 @@
       displayMessage("✅ Google Driveに保存しました");
     } catch (err) {
       console.error(err);
-      displayMessage("❌ Google Driveへの保存に失敗しました");
+      displayMessage("❌ Google Driveへの保存に失敗しました" + err.message);
     }
   }
 
