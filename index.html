@@ -152,6 +152,65 @@
   #sortable-player-list li.dragging {
     opacity: 0.5;
   }
+  /* 称号のスタイル */
+  .title {
+    font-weight: bold;
+    margin-left: 8px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: white;
+    font-size: 0.9rem;
+    vertical-align: middle;
+    display: inline-block;
+    user-select: none;
+  }
+
+  /* 1～3位 特殊エフェクト：雷を彷彿とさせる光り輝くアニメーション */
+  .title.top1 {
+    background: linear-gradient(45deg, #f9d71c, #ffec4f, #f9d71c);
+    animation: lightningGlow 1.5s infinite alternate;
+    box-shadow: 0 0 8px 2px #f9d71c;
+  }
+  .title.top2 {
+    background: linear-gradient(45deg, #c0c0c0, #e0e0e0, #c0c0c0);
+    animation: lightningGlow 1.5s infinite alternate;
+    box-shadow: 0 0 6px 2px #c0c0c0;
+  }
+  .title.top3 {
+    background: linear-gradient(45deg, #cd7f32, #d9a441, #cd7f32);
+    animation: lightningGlow 1.5s infinite alternate;
+    box-shadow: 0 0 5px 1.5px #cd7f32;
+  }
+
+  @keyframes lightningGlow {
+    from {
+      filter: drop-shadow(0 0 5px #ffeb3b);
+      opacity: 0.8;
+    }
+    to {
+      filter: drop-shadow(0 0 20px #ffeb3b);
+      opacity: 1;
+    }
+  }
+
+  /* 最下位称号：死神を思わせる暗くて赤いエフェクト */
+  .title.last {
+    background: linear-gradient(45deg, #440000, #880000, #440000);
+    color: #ff4444;
+    animation: deathGlow 2s infinite alternate;
+    box-shadow: 0 0 10px 3px #880000;
+  }
+
+  @keyframes deathGlow {
+    from {
+      filter: drop-shadow(0 0 5px #ff0000);
+      opacity: 0.7;
+    }
+    to {
+      filter: drop-shadow(0 0 15px #ff0000);
+      opacity: 1;
+    }
+  }
 </style>
 </head>
 <body>
@@ -327,6 +386,48 @@
     btn.textContent = isRankingMode ? "📋 順位登録モードを終了" : "📋 順位登録モード切替";
   }
 
+　function updateTitles() {
+  // レート順に降順ソート
+  const sortedPlayers = Object.entries(players).sort((a, b) => b[1].currentRate - a[1].currentRate);
+
+  // 称号リセット
+  for (const [, player] of Object.entries(players)) {
+    player.title = "";
+    player.titleClass = "";
+  }
+
+  // 上位3位に称号とクラス付与
+  const topTitles = ["キング", "ナンバー2", "ブロンズ"];
+  const topClasses = ["top1", "top2", "top3"];
+  for (let i = 0; i < 3 && i < sortedPlayers.length; i++) {
+    sortedPlayers[i][1].title = topTitles[i];
+    sortedPlayers[i][1].titleClass = topClasses[i];
+  }
+
+  // 最下位に称号とクラス付与（プレイヤーが1人以上の場合）
+  if (sortedPlayers.length > 0) {
+    const lastPlayer = sortedPlayers[sortedPlayers.length - 1][1];
+    lastPlayer.title = "死神";
+    lastPlayer.titleClass = "last";
+  }
+}
+
+// 表示例（テーブル行などで使うイメージ）
+function renderPlayerRow(playerId) {
+  const player = players[playerId];
+  if (!player) return "";
+
+  const titleSpan = player.title
+    ? `<span class="title ${player.titleClass}" aria-label="称号">${player.title}</span>`
+    : "";
+
+  return `<tr>
+    <td>${player.name} ${titleSpan}</td>
+    <td>${player.currentRate}</td>
+  </tr>`;
+}
+
+  
   function updateCurrentSeatDisplay() {
     const el = document.getElementById("currentSeatText");
     if (!el) return;
