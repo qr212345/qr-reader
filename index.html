@@ -515,6 +515,102 @@ function undoLastRegistration(seatId) {
   displayMessage(`座席「${seatId}」に取り消せる登録がありません。`);
 }
 
+function toggleRankingMode() {
+  isRankingMode = !isRankingMode;
+  updateRankingToggleButton();
+
+  if (isRankingMode) {
+    // 順位登録モードに入ったら現在の座席登録は完了状態にしておく
+    currentSeat = null;
+    updateCurrentSeatDisplay();
+    displayMessage("📋 順位登録モードに切り替わりました。座席QRを読み取って順位を登録してください。");
+
+    // 順位登録モード用UIを表示
+    showRankingSelectionUI();
+  } else {
+    // 通常モードに戻ったら
+    displayMessage("通常モードに戻りました。");
+    hideRankingSelectionUI();
+  }
+}
+function showRankingSelectionUI() {
+  const ui = document.getElementById("ranking-select-ui");
+  if (!ui) return;
+  ui.style.display = "block";
+
+  // 座席一覧を取得して空リストをクリア
+  const rankingList = document.getElementById("rankingList");
+  rankingList.innerHTML = "";
+
+  // すべての座席ごとにリストアイテムを作る（例として座席IDのみ）
+  Object.keys(seatMap).sort().forEach(seatId => {
+    const li = document.createElement("li");
+    li.textContent = seatId;
+    li.setAttribute("draggable", "true");
+    li.dataset.seatId = seatId;
+    rankingList.appendChild(li);
+  });
+
+  // ドラッグ＆ドロップのイベントリスナーをセット
+  enableDragAndDrop(rankingList);
+}
+
+function hideRankingSelectionUI() {
+  const ui = document.getElementById("ranking-select-ui");
+  if (!ui) return;
+  ui.style.display = "none";
+}
+function enableDragAndDrop(listEl) {
+  let dragged = null;
+
+  listEl.querySelectorAll("li").forEach(li => {
+    li.addEventListener("dragstart", e => {
+      dragged = li;
+      li.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+    });
+    li.addEventListener("dragend", e => {
+      dragged.classList.remove("dragging");
+      dragged = null;
+    });
+    li.addEventListener("dragover", e => {
+      e.preventDefault();
+      if (li !== dragged) {
+        const bounding = li.getBoundingClientRect();
+        const offset = bounding.y + bounding.height / 2;
+        const parent = li.parentNode;
+        if (e.clientY - offset > 0) {
+          parent.insertBefore(dragged, li.nextSibling);
+        } else {
+          parent.insertBefore(dragged, li);
+        }
+      }
+    });
+  });
+}
+function confirmRanking() {
+  if (!isRankingMode) {
+    displayMessage("順位登録モードではありません。");
+    return;
+  }
+  const rankingList = document.getElementById("rankingList");
+  const newOrder = Array.from(rankingList.children).map(li => li.dataset.seatId);
+
+  // ここで newOrder に順位（1位〜）を付与してseatMapなどに反映可能
+  // 例として各座席に順位を付けて保存する
+  newOrder.forEach((seatId, index) => {
+    if (!seatMap[seatId]) return;
+    seatMap[seatId].rank = index + 1;
+  });
+
+  displayMessage("順位を確定しました。通常モードに戻ります。");
+  isRankingMode = false;
+  updateRankingToggleButton();
+  hideRankingSelectionUI();
+  updateTable();
+}
+
+  
 // ========== 座席登録削除（座席ごと消す） ==========
 
 function deleteSeat(seatId) {
