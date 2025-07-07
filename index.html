@@ -931,22 +931,6 @@ function exportCSV() {
   URL.revokeObjectURL(url);
 }
 
-// ========== 称号システム（自動付与） ==========
-
-function getTitle(player) {
-  if (!player || player.rate === undefined) return "";
-  const rate = player.rate;
-
-  if (rate >= 90) return "👑 王者";
-  if (rate >= 80) return "🔥 強豪";
-  if (rate >= 70) return "⭐ 実力者";
-  if (rate <= 35) return "💧 リベンジャー";
-  if (rate <= 30) return "🥲 修行中";
-  return "";
-}
-
-// ========== 称号を含めたレート表の更新 ==========
-
 function updateRateTable() {
   const table = document.getElementById("rateTable");
   if (!table) return;
