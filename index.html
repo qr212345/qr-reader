@@ -250,6 +250,21 @@
   <button id="confirmRankingBtn" onclick="confirmRanking()">順位確定</button>
 </div>
 
+<div id="messageBox" aria-live="polite" style="
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 10000;
+"></div>
+
+
 <!-- 座席と生徒の登録状況テーブル -->
 <section class="footer-area" aria-label="現在の座席登録状況">
   <h2>現在の座席登録</h2>
@@ -380,11 +395,6 @@
   }
 
   // メッセージ表示更新
-  function displayMessage(msg) {
-    const el = document.get
-  if (el) el.innerText = msg;
-}
-
 function displayMessage(text) {
   const msgEl = document.getElementById("messageBox");
   if (msgEl) {
@@ -433,7 +443,7 @@ function updateCurrentSeatDisplay() {
 // ========== 座席一覧表示更新 ==========
 
 function updateTable() {
-  const listEl = document.getElementById("seatList");
+  const listEl = document.getElementById("seatTable tbody");
   if (!listEl) return;
 
   listEl.innerHTML = ""; // いったんクリア
@@ -529,7 +539,7 @@ function deleteSeat(seatId) {
 
 // ========== 座席登録完了処理 ==========
 
-function completeCurrentSeat() {
+async function completeCurrentSeat() {
   if (!currentSeat) return;
 
   // 6人未満でも登録完了を許可
