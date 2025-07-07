@@ -216,7 +216,16 @@
   }
 </style>
 <body>
+<div id="messageBox" style="transition: opacity 0.5s; margin: 1em 0; color: darkgreen;"></div>
 
+  <!-- 順位登録用リスト -->
+  <h4>順位登録リスト</h4>
+  <ul id="rankingList" class="ranking-list"></ul>
+
+  <!-- レート表 -->
+  <h4>レート一覧</h4>
+  <table id="rateTable" border="1"></table>
+  
 <h1>QRコードリーダー</h1>
 <p>座席（table〜）→ 生徒（player〜）の順に読み取り。6人まで登録。生徒IDクリックで削除可能。</p>
 
@@ -282,6 +291,10 @@
   let actionHistory = [];  // 操作履歴（undo用）
   let lastScanTime = 0;    // 連続スキャン防止用タイムスタンプ
   let isRankingMode = false;  // 順位登録モードフラグ
+  let playerMap = {};
+  let currentSeat = null;
+  let seatMap = {};
+  let actionHistory = [];
   let playerMap = JSON.parse(localStorage.getItem("playerMap") ||"{}")
 
   // 事前にlocalStorageからプレイヤー情報を取得（任意、初期は空オブジェクト）
@@ -304,6 +317,22 @@
     updateCurrentSeatDisplay();
   });
 
+  function initGoogleAPI() {
+    gapi.load("client:auth2", () => {
+      gapi.client.init({
+        apiKey: "YOUR_API_KEY",
+        clientId: "YOUR_CLIENT_ID.apps.googleusercontent.com",
+        scope: "https://www.googleapis.com/auth/drive.file"
+      }).then(() => {
+        console.log("✅ Google API 初期化完了");
+      }).catch(e => {
+        console.error("❌ Google API 初期化エラー", e);
+      });
+    });
+  }
+
+  // DOMロード後に初期化
+  window.addEventListener("load", initGoogleAPI);
   // QRコードスキャナー起動
   function startQrCodeScanner() {
     const html5QrCode = new Html5Qrcode("reader");
