@@ -1111,7 +1111,7 @@ window.addEventListener("DOMContentLoaded", () => {
 <script>
 // ランクに応じた称号生成（共通関数）
 function getTitle(player) {
-  const rate = player.rate ?? 50;
+  const rate = player.rate || 50;
   if (rate >= 100) return "伝説";
   if (rate >= 90) return "神";
   if (rate >= 80) return "覇者";
