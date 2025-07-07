@@ -152,46 +152,66 @@
   #sortable-player-list li.dragging {
     opacity: 0.5;
   }
-  /* 称号のスタイル */
-  .title {
-    font-weight: bold;
-    margin-left: 8px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    color: white;
-    font-size: 0.9rem;
-    vertical-align: middle;
-    display: inline-block;
-    user-select: none;
-  }
+  /* 1位：雷（黄色のピカピカ光） */
+.title.top1 {
+  background: linear-gradient(45deg, #f9d71c, #ffec4f, #f9d71c);
+  animation: lightningGlow 1.5s infinite alternate;
+  box-shadow: 0 0 8px 3px #f9d71c;
+}
 
-  /* 1～3位 特殊エフェクト：雷を彷彿とさせる光り輝くアニメーション */
-  .title.top1 {
-    background: linear-gradient(45deg, #f9d71c, #ffec4f, #f9d71c);
-    animation: lightningGlow 1.5s infinite alternate;
-    box-shadow: 0 0 8px 2px #f9d71c;
+@keyframes lightningGlow {
+  0% {
+    filter: drop-shadow(0 0 5px #ffeb3b);
+    opacity: 0.8;
   }
-  .title.top2 {
-    background: linear-gradient(45deg, #c0c0c0, #e0e0e0, #c0c0c0);
-    animation: lightningGlow 1.5s infinite alternate;
-    box-shadow: 0 0 6px 2px #c0c0c0;
+  100% {
+    filter: drop-shadow(0 0 20px #ffeb3b);
+    opacity: 1;
   }
-  .title.top3 {
-    background: linear-gradient(45deg, #cd7f32, #d9a441, #cd7f32);
-    animation: lightningGlow 1.5s infinite alternate;
-    box-shadow: 0 0 5px 1.5px #cd7f32;
-  }
+}
 
-  @keyframes lightningGlow {
-    from {
-      filter: drop-shadow(0 0 5px #ffeb3b);
-      opacity: 0.8;
-    }
-    to {
-      filter: drop-shadow(0 0 20px #ffeb3b);
-      opacity: 1;
-    }
+/* 2位：波（青い波のうねりアニメーション） */
+.title.top2 {
+  background: linear-gradient(90deg, #2196f3, #64b5f6, #2196f3);
+  animation: waveGlow 3s infinite linear;
+  box-shadow: 0 0 10px 2px #2196f3;
+}
+
+@keyframes waveGlow {
+  0% {
+    background-position: 0% 50%;
+    box-shadow: 0 0 8px 2px #2196f3;
   }
+  50% {
+    background-position: 100% 50%;
+    box-shadow: 0 0 15px 4px #64b5f6;
+  }
+  100% {
+    background-position: 0% 50%;
+    box-shadow: 0 0 8px 2px #2196f3;
+  }
+}
+
+/* 3位：風（白く柔らかい流れる影の動き） */
+.title.top3 {
+  background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
+  animation: windGlow 4s infinite ease-in-out alternate;
+  box-shadow: 0 0 6px 2px #81d4fa;
+  color: #0277bd;
+}
+
+@keyframes windGlow {
+  0% {
+    text-shadow: 0 0 5px #b2ebf2;
+    box-shadow: 0 0 6px 2px #81d4fa;
+    opacity: 0.8;
+  }
+  100% {
+    text-shadow: 0 0 15px #e0f7fa;
+    box-shadow: 0 0 12px 4px #4fc3f7;
+    opacity: 1;
+  }
+}
 
   /* 最下位称号：死神を思わせる暗くて赤いエフェクト */
   .title.last {
