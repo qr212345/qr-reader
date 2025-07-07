@@ -417,7 +417,7 @@
   }
 
   // 上位3位に称号とクラス付与
-  const topTitles = ["キング", "ナンバー2", "ブロンズ"];
+  const topTitles = ["駆け引きの達人", "手札の番人", "運の使い手"];
   const topClasses = ["top1", "top2", "top3"];
   for (let i = 0; i < 3 && i < sortedPlayers.length; i++) {
     sortedPlayers[i][1].title = topTitles[i];
@@ -427,7 +427,7 @@
   // 最下位に称号とクラス付与（プレイヤーが1人以上の場合）
   if (sortedPlayers.length > 0) {
     const lastPlayer = sortedPlayers[sortedPlayers.length - 1][1];
-    lastPlayer.title = "死神";
+    lastPlayer.title = "ジョーカー愛好家";
     lastPlayer.titleClass = "last";
   }
 }
