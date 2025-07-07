@@ -247,6 +247,7 @@
   <button onclick="saveSeatMapToDrive()" aria-label="Google Driveに保存">💾 Google Driveに保存</button>
   <button onclick="loadSeatMapFromDrive()" aria-label="Driveから復元">☁ Driveから復元</button>
   <button onclick="toggleRankingMode()" aria-pressed="false" id="toggleRankingBtn">📋 順位登録モード切替</button>
+  <button id="confirmRankingBtn" onclick="confirmRanking()">順位確定</button>
 </div>
 
 <!-- 座席と生徒の登録状況テーブル -->
@@ -269,6 +270,7 @@
   let actionHistory = [];  // 操作履歴（undo用）
   let lastScanTime = 0;    // 連続スキャン防止用タイムスタンプ
   let isRankingMode = false;  // 順位登録モードフラグ
+  let playerMap = JSON.parse(localStorage.getItem("playerMap") ||"{}")
 
   // 事前にlocalStorageからプレイヤー情報を取得（任意、初期は空オブジェクト）
   let players = JSON.parse(localStorage.getItem("players") || "{}");
@@ -380,145 +382,20 @@
   // メッセージ表示更新
   function displayMessage(msg) {
     const el = document.get
-// ========== 初期設定 ==========
-
-const API_URL = "https://script.google.com/macros/s/AKfycbyTxi9AHEaql2PpbrlnpFIW0jVzqD2jo_MEftHHYGQCSXPm5Dcqlz4UcZ_nQYHNDHdT/exec";
-
-let currentSeat = null;        // 現在選択中の座席ID（例：table01）
-let seatMap = {};              // { seatID: [playerID,...], ... }
-let actionHistory = [];        // 直近の登録操作を記録して取り消しに使う
-let lastScanTime = 0;          // 最終スキャン時刻（ミリ秒）
-let isRankingMode = false;     // 順位登録モードかどうか
-
-// プレイヤーデータ（必要に応じて拡張）
-let players = JSON.parse(localStorage.getItem("players") || "{}");
-
-// ========== 初期化処理 ==========
-
-document.addEventListener("DOMContentLoaded", async () => {
-  // ローカル保存から復元
-  const savedMap = localStorage.getItem("seatMap");
-  if (savedMap) {
-    seatMap = JSON.parse(savedMap);
-    displayMessage("📦 前回のデータを復元しました");
-    updateTable();
-  } else {
-    // Google Driveからの復元も試みる
-    await loadSeatMapFromDrive();
-  }
-
-  startQrCodeScanner();
-  updateCompleteSeatBtn(false);
-  updateRankingToggleButton();
-  updateCurrentSeatDisplay();
-});
-
-// ========== QRコードスキャン開始 ==========
-
-function startQrCodeScanner() {
-  const html5QrCode = new Html5Qrcode("reader");
-  html5QrCode.start(
-    { facingMode: "environment" },
-    {
-      fps: 15,
-      qrbox: { width: 250, height: 250 },
-      aspectRatio: 1.33
-    },
-    onScanSuccess,
-    onScanFailure
-  ).catch(err => {
-    console.error("カメラ起動エラー:", err);
-    displayMessage("カメラ起動に失敗しました: " + err);
-  });
-}
-
-// ========== スキャン失敗時（無視） ==========
-
-function onScanFailure(error) {
-  // 無視（特に表示なし）
-}
-
-// ========== スキャン成功時の処理 ==========
-
-function onScanSuccess(decodedText) {
-  const now = Date.now();
-  // 2秒未満の連続読み取りを無視（誤検知防止）
-  if (now - lastScanTime < 2000) return;
-  lastScanTime = now;
-
-  // QRコード形式チェック（"table"か"player"で始まるか）
-  if (!/^(table|player)/.test(decodedText)) {
-    displayMessage("❗不正なQRコードです。'table〜' または 'player〜' で始めてください。");
-    return;
-  }
-
-  // 順位登録モード時の挙動
-  if (isRankingMode) {
-    if (decodedText.startsWith("table")) {
-      if (!seatMap[decodedText]) {
-        displayMessage(`⚠ 座席データが存在しません: ${decodedText}`);
-        return;
-      }
-      showRankingSelection(decodedText);
-    } else {
-      displayMessage("⚠ 順位登録モードでは座席QRのみ読み取ってください。");
-    }
-    return;
-  }
-
-  // 通常モードの座席QR読み取り
-  if (decodedText.startsWith("table")) {
-    currentSeat = decodedText;
-    if (!seatMap[currentSeat]) seatMap[currentSeat] = [];
-    displayMessage(`座席「${currentSeat}」を読み取りました。最大6人まで登録可能。`);
-    updateCompleteSeatBtn(true);
-    updateTable();
-    updateCurrentSeatDisplay();
-    return;
-  }
-
-  // 通常モードの生徒QR読み取り
-  if (decodedText.startsWith("player")) {
-    if (!currentSeat) {
-      displayMessage("最初に座席QR（table〜）を読み取ってください。");
-      return;
-    }
-    const people = seatMap[currentSeat];
-
-    if (people.length >= 6) {
-      displayMessage(`座席「${currentSeat}」は6人までです。登録を完了します。`);
-      completeCurrentSeat();
-      updateCurrentSeatDisplay();
-      return;
-    }
-
-    if (people.includes(decodedText)) {
-      displayMessage(`「${decodedText}」は既に座席「${currentSeat}」に登録されています。`);
-      return;
-    }
-
-    // 登録
-    people.push(decodedText);
-    actionHistory.push({ seat: currentSeat, person: decodedText });
-    displayMessage(`「${decodedText}」を座席「${currentSeat}」に登録（${people.length}/6）`);
-
-    if (people.length >= 6) {
-      displayMessage("上限に達しました。登録を完了します。");
-      completeCurrentSeat();
-    }
-
-    updateTable();
-    updateCurrentSeatDisplay();
-  }
-}
-
-// ========== メッセージ表示 ==========
-
-function displayMessage(msg) {
-  const el = document.getElementById("result");
   if (el) el.innerText = msg;
 }
 
+function displayMessage(text) {
+  const msgEl = document.getElementById("messageBox");
+  if (msgEl) {
+    msgEl.textContent = text;
+    msgEl.style.opacity = 1;
+    setTimeout(() => { msgEl.style.opacity = 0; }, 4000);
+  } else {
+    alert(text);
+  }
+}
+  
 // ========== 「登録完了」ボタンの表示切り替え ==========
 
 function updateCompleteSeatBtn(show) {
@@ -665,7 +542,7 @@ function completeCurrentSeat() {
   saveSeatMapLocal();
 
   // ここでGoogle Drive保存を呼び出し（非同期）
-  saveSeatMapToDrive();
+  await saveSeatMapToDrive();
 }
 
 // ========== ローカルストレージに保存 ==========
