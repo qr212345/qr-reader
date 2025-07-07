@@ -1224,7 +1224,8 @@ window.addEventListener("DOMContentLoaded", () => {
     table.appendChild(tr);
   });
 });
-
+</script>
+<script>
 // ランクに応じた称号生成（共通関数）
 function getTitle(player) {
   const rate = player.rate ?? 50;
@@ -1237,6 +1238,6 @@ function getTitle(player) {
   if (rate >= 40) return "初心者";
   return "修行中";
 }
-
+</script>
 </body>
 </html>
