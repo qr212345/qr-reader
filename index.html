@@ -216,16 +216,28 @@
   }
 </style>
 <body>
-<div id="messageBox" style="transition: opacity 0.5s; margin: 1em 0; color: darkgreen;"></div>
+<div id="messageBox" aria-live="polite" style="
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 10000;
+"></div>
 
-  <!-- 順位登録用リスト -->
-  <h4>順位登録リスト</h4>
-  <ul id="rankingList" class="ranking-list"></ul>
+<!-- 順位登録用リスト -->
+<h4>順位登録リスト</h4>
+<ul id="rankingList" class="ranking-list"></ul>
 
-  <!-- レート表 -->
-  <h4>レート一覧</h4>
-  <table id="rateTable" border="1"></table>
-  
+<!-- レート表 -->
+<h4>レート一覧</h4>
+<table id="rateTable" border="1"></table>
+
 <h1>QRコードリーダー</h1>
 <p>座席（table〜）→ 生徒（player〜）の順に読み取り。6人まで登録。生徒IDクリックで削除可能。</p>
 
@@ -252,29 +264,15 @@
   <button id="confirmRankingBtn" onclick="confirmRanking()">順位確定</button>
 </div>
 
-<div id="messageBox" aria-live="polite" style="
-  position: fixed;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #333;
-  color: white;
-  padding: 0.8rem 1.2rem;
-  border-radius: 8px;
-  opacity: 0;
-  transition: opacity 0.3s;
-  z-index: 10000;
-"></div>
-
 <div id="ranking-select-ui" style="display: none;">
   <h3>順位を並べ替えてください</h3>
-  <ul id="rankingList"></ul>
+  <ul id="rankingListEdit" class="ranking-list"></ul> <!-- もし編集用に分けたいなら -->
   <button onclick="confirmRanking()">順位確定</button>
 </div>
-<!-- 座席と生徒の登録状況テーブル -->
+
 <section class="footer-area" aria-label="現在の座席登録状況">
   <h2>現在の座席登録</h2>
-  <table id="seatTable" role="table" aria-describedby="tableDesc">
+  <table id="seatTable" role="table" aria-describedby="tableDesc" border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%; max-width: 600px;">
     <caption id="tableDesc">座席IDと生徒ID一覧および順位</caption>
     <thead>
       <tr><th scope="col">座席ID</th><th scope="col">生徒ID一覧</th><th scope="col">順位</th></tr>
