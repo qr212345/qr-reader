@@ -1,1 +1,208 @@
-
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f8;
+    color: #333;
+    margin: 0; padding: 1rem; text-align: center;
+    overflow-x: hidden;
+  }
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+  }
+  #currentSeatDisplay {
+    margin: 1rem auto;
+    font-size: 1.3rem;
+    font-weight: bold;
+    max-width: 480px;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    background-color: #ffe082; /* 明るいオレンジ */
+    color: #5d4037;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  #result {
+    font-weight: bold;
+    background-color: #e0f7fa;
+    padding: 0.8rem 1rem;
+    margin: 0 auto 1.5rem;
+    max-width: 480px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 3rem;
+  }
+  .button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    max-width: 320px;
+    margin: 1rem auto 3rem;
+  }
+  button {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+  }
+  button:hover {
+    background-color: #43a047;
+  }
+  button:active {
+    transform: scale(0.97);
+  }
+  #completeSeatBtn {
+    background-color: #ff9800;
+    display: none;
+  }
+  #completeSeatBtn:hover {
+    background-color: #fb8c00;
+  }
+  table {
+    width: 95%;
+    max-width: 800px;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+  th {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px;
+    text-align: left;
+  }
+  td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    vertical-align: middle;
+  }
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+  .student {
+    display: inline-block;
+    background-color: #e3f2fd;
+    color: #1976d2;
+    padding: 4px 8px;
+    border-radius: 16px;
+    margin: 4px 6px 4px 0;
+    font-size: 0.9rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+  }
+  .student:hover {
+    background-color: #bbdefb;
+  }
+  .seat {
+    cursor: pointer;
+    color: #d32f2f;
+    font-weight: bold;
+    user-select: none;
+    transition: color 0.3s ease;
+  }
+  .seat:hover {
+    color: #b71c1c;
+    text-decoration: underline;
+  }
+  #seatTable tbody tr:hover {
+    background-color: #e8f5e9;
+  }
+  /* モーダルの順位登録UI */
+  #ranking-select-ui {
+    position: fixed;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    padding: 1rem;
+    background: #fff;
+    border: 1px solid #ccc;
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  }
+  #ranking-select-ui h3 {
+    margin-top: 0;
+  }
+  #sortable-player-list {
+    list-style: none;
+    padding: 0;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 1rem;
+  }
+  #sortable-player-list li {
+    padding: 8px;
+    margin: 4px 0;
+    background: #e3f2fd;
+    border-radius: 4px;
+    cursor: move;
+    user-select: none;
+  }
+  #sortable-player-list li.dragging {
+    opacity: 0.5;
+  }
+  /* 称号エフェクト */
+  .title.top1 {
+    background: linear-gradient(45deg, #f9d71c, #ffec4f, #f9d71c);
+    animation: lightningGlow 1.5s infinite alternate;
+    box-shadow: 0 0 8px 3px #f9d71c;
+  }
+  @keyframes lightningGlow {
+    0% { filter: drop-shadow(0 0 5px #ffeb3b); opacity: 0.8; }
+    100% { filter: drop-shadow(0 0 20px #ffeb3b); opacity: 1; }
+  }
+  .title.top2 {
+    background: linear-gradient(90deg, #2196f3, #64b5f6, #2196f3);
+    animation: waveGlow 3s infinite linear;
+    box-shadow: 0 0 10px 2px #2196f3;
+  }
+  @keyframes waveGlow {
+    0% { background-position: 0% 50%; box-shadow: 0 0 8px 2px #2196f3; }
+    50% { background-position: 100% 50%; box-shadow: 0 0 15px 4px #64b5f6; }
+    100% { background-position: 0% 50%; box-shadow: 0 0 8px 2px #2196f3; }
+  }
+  .title.top3 {
+    background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
+    animation: windGlow 4s infinite ease-in-out alternate;
+    box-shadow: 0 0 6px 2px #81d4fa;
+    color: #0277bd;
+  }
+  @keyframes windGlow {
+    0% {
+      text-shadow: 0 0 5px #b2ebf2;
+      box-shadow: 0 0 6px 2px #81d4fa;
+      opacity: 0.8;
+    }
+    100% {
+      text-shadow: 0 0 15px #e0f7fa;
+      box-shadow: 0 0 12px 4px #4fc3f7;
+      opacity: 1;
+    }
+  }
+  .title.last {
+    background: linear-gradient(45deg, #440000, #880000, #440000);
+    color: #ff4444;
+    animation: deathGlow 2s infinite alternate;
+    box-shadow: 0 0 10px 3px #880000;
+  }
+  @keyframes deathGlow {
+    from {
+      filter: drop-shadow(0 0 5px #ff0000);
+      opacity: 0.7;
+    }
+    to {
+      filter: drop-shadow(0 0 15px #ff0000);
+      opacity: 1;
+    }
+  }
+</style>
