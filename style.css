@@ -237,43 +237,45 @@ tbody tr:last-child td {
     opacity: 1;
   }
 }
+
 #sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 0;
-    background-color: #333;
-    color: white;
-    overflow-x: hidden;
-    transition: width 0.3s ease;
-    padding-top: 2rem;
-  }
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 0;
+  background-color: #333;
+  color: white;
+  overflow-x: hidden;
+  transition: width 0.3s ease;
+  padding-top: 2rem;
+  z-index: 9998; /* ホバーエリアより低めに */
+}
 
-  /* ホバー検知用エリア */
-  #sidebar-hover-area {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 30px; /* ここにカーソルが入るとサイドバーが開く */
-    z-index: 1000;
-  }
+/* ホバー検知用の透明エリア */
+#sidebar-hover-area {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 30px; /* マウスが入るとサイドバー開く */
+  z-index: 9999; /* サイドバーより上に */
+}
 
-  /* ホバー時にサイドバーを展開 */
-  #sidebar-hover-area:hover + #sidebar {
-    width: 250px;
-    padding-left: 1rem;
-  }
+/* ホバー時に隣接するサイドバーを展開 */
+#sidebar-hover-area:hover + #sidebar {
+  width: 250px;
+  padding-left: 1rem;
+}
 
-  /* サイドバー内のリンク例 */
-  #sidebar a {
-    display: block;
-    padding: 1rem;
-    color: white;
-    text-decoration: none;
-  }
+/* サイドバー内リンク */
+#sidebar a {
+  display: block;
+  padding: 1rem;
+  color: white;
+  text-decoration: none;
+}
 
-  #sidebar a:hover {
-    background-color: #555;
-  }
+#sidebar a:hover {
+  background-color: #555;
+}
