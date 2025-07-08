@@ -2,8 +2,8 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f0f4f8;
   color: #333;
-  margin: 0; 
-  padding: 1rem; 
+  margin: 0;
+  padding: 1rem;
   text-align: center;
   overflow-x: hidden;
 }
@@ -236,28 +236,4 @@ tbody tr:last-child td {
     filter: drop-shadow(0 0 15px #ff0000);
     opacity: 1;
   }
-}
-
-/* ポップアップ演出用 */
-.popup-message {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: #4caf50; /* あなたのボタン色と合わせました */
-  color: white;
-  padding: 1rem 2rem;
-  border-radius: 10px;
-  box-shadow: 0 0 12px rgba(76, 175, 80, 0.7);
-  font-weight: 600;
-  font-size: 1.2rem;
-  z-index: 11000;
-  user-select: none;
-  opacity: 1;
-  transition: opacity 0.5s ease;
-}
-
-/* フェードアウト */
-.popup-message.fadeout {
-  opacity: 0;
 }
