@@ -195,6 +195,7 @@ function updateRateTableWithDiff() {
 }
 
 
+
 // --- 称号判定例 ---
 function getTitle(rating) {
   if (rating >= 90) return "伝説";
