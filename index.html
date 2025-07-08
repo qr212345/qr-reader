@@ -6,66 +6,160 @@
   <title>コード順位登録サイト</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    header {
+      background-color: #333;
+      color: white;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 {
+      font-size: 1.2rem;
+      margin: 0;
+    }
+    header nav a {
+      color: white;
+      margin-left: 1rem;
+      text-decoration: none;
+    }
+    #sidebar {
+      position: fixed;
+      top: 3.5rem;
+      left: 0;
+      width: 220px;
+      height: 100%;
+      background-color: #f4f4f4;
+      padding: 1rem;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+    #sidebar.hidden {
+      transform: translateX(-100%);
+    }
+    #sidebar a {
+      display: block;
+      margin-bottom: 1rem;
+      text-decoration: none;
+      color: #333;
+    }
+    main {
+      margin-left: 240px;
+      padding: 1rem;
+    }
+    @media (max-width: 768px) {
+      #sidebar {
+        position: fixed;
+        top: 3.5rem;
+        height: calc(100% - 3.5rem);
+        z-index: 10;
+      }
+      main {
+        margin-left: 0;
+        padding: 1rem;
+      }
+    }
+    #toggleSidebarBtn {
+      background: #444;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      margin-left: 1rem;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- メッセージ表示 -->
-  <div id="messageBox" aria-live="polite"></div>
+  <!-- ヘッダー -->
+  <header>
+    <div>
+      <button id="toggleSidebarBtn">☰</button>
+      <h1>コード順位登録サイト</h1>
+    </div>
+    <nav>
+      <a href="https://github.com/your-repo" target="_blank" rel="noopener">GitHub</a>
+      <a href="settings.html">設定</a>
+    </nav>
+  </header>
 
-  <!-- 順位登録用リスト -->
-  <h4>順位登録リスト</h4>
-  <ul id="rankingList" class="ranking-list"></ul>
+  <!-- サイドバー -->
+  <aside id="sidebar">
+    <a href="#qr">📷 QRコードスキャン</a>
+    <a href="#ranking">📋 順位登録</a>
+    <a href="#rate">📈 レート表</a>
+    <a href="#seats">💺 座席情報</a>
+  </aside>
 
-  <!-- レート表 -->
-  <h4>レート一覧</h4>
-  <table id="rateTable" border="1"></table>
+  <!-- メイン -->
+  <main>
+    <!-- QRコード -->
+    <section id="qr">
+      <h2>QRコードリーダー</h2>
+      <p>座席（table〜）→ 生徒（player〜）の順に読み取り。6人まで登録。</p>
+      <div id="currentSeatDisplay">
+        <strong>現在の座席:</strong> <span id="currentSeatText">未選択</span>
+      </div>
+      <div id="reader-wrapper"><div id="reader"></div></div>
+      <div id="result" aria-live="polite">ここに読み取り結果が表示されます</div>
+    </section>
 
-  <h1>QRコードリーダー</h1>
-  <p>座席（table〜）→ 生徒（player〜）の順に読み取り。6人まで登録。生徒IDクリックで削除可能。</p>
+    <!-- 操作ボタン -->
+    <section>
+      <h2>操作</h2>
+      <div class="button-group">
+        <button onclick="downloadCSV()">CSVで保存</button>
+        <button onclick="completeCurrentSeat()">この座席の登録を完了</button>
+        <button onclick="undoLast()">最後の追加を取り消す</button>
+        <button onclick="clearSavedData()">🗑 保存データを削除</button>
+        <button onclick="saveSeatMapToDrive()">💾 Google Driveに保存</button>
+        <button onclick="loadSeatMapFromDrive()">☁ Driveから復元</button>
+        <button onclick="toggleRankingMode()" id="toggleRankingBtn">📋 順位登録モード切替</button>
+        <button onclick="confirmRanking()">順位確定</button>
+      </div>
+    </section>
 
-  <!-- 現在の座席 -->
-  <div id="currentSeatDisplay" aria-live="polite" role="region" aria-label="現在の座席選択状況">
-    現在の座席: <span id="currentSeatText">未選択</span>
-  </div>
+    <!-- 順位登録 -->
+    <section id="ranking">
+      <h2>順位登録</h2>
+      <ul id="rankingList" class="ranking-list"></ul>
+      <div id="ranking-select-ui" style="display: none;">
+        <h3>順位を並べ替えてください</h3>
+        <ul id="rankingListEdit" class="ranking-list"></ul>
+        <button onclick="confirmRanking()">順位確定</button>
+      </div>
+    </section>
 
-  <!-- QRコード読み取り領域 -->
-  <div id="reader-wrapper"><div id="reader"></div></div>
+    <!-- レート -->
+    <section id="rate">
+      <h2>レート一覧</h2>
+      <table id="rateTable" border="1"></table>
+    </section>
 
-  <!-- 結果表示 -->
-  <div id="result" aria-live="polite" role="status">ここに読み取り結果が表示されます</div>
+    <!-- 座席 -->
+    <section id="seats">
+      <h2>現在の座席登録</h2>
+      <table id="seatTable" border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%; max-width: 600px;">
+        <thead>
+          <tr><th>座席ID</th><th>生徒ID一覧</th><th>順位</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
 
-  <!-- 操作ボタン群 -->
-  <div class="button-group" role="group" aria-label="操作ボタン群">
-    <button onclick="downloadCSV()" aria-label="CSVで保存">CSVで保存</button>
-    <button id="completeSeatBtn" onclick="completeCurrentSeat()" aria-label="この座席の登録を完了">この座席の登録を完了</button>
-    <button onclick="undoLast()" aria-label="最後の追加を取り消す">最後の追加を取り消す</button>
-    <button onclick="clearSavedData()" aria-label="保存データを削除">🗑 保存データを削除</button>
-    <button onclick="saveSeatMapToDrive()" aria-label="Google Driveに保存">💾 Google Driveに保存</button>
-    <button onclick="loadSeatMapFromDrive()" aria-label="Driveから復元">☁ Driveから復元</button>
-    <button onclick="toggleRankingMode()" aria-pressed="false" id="toggleRankingBtn">📋 順位登録モード切替</button>
-    <button id="confirmRankingBtn" onclick="confirmRanking()">順位確定</button>
-  </div>
-
-  <!-- 順位並べ替えUI -->
-  <div id="ranking-select-ui" style="display: none;">
-    <h3>順位を並べ替えてください</h3>
-    <ul id="rankingListEdit" class="ranking-list"></ul>
-    <button onclick="confirmRanking()">順位確定</button>
-  </div>
-
-  <!-- 座席情報 -->
-  <section class="footer-area" aria-label="現在の座席登録状況">
-    <h2>現在の座席登録</h2>
-    <table id="seatTable" role="table" aria-describedby="tableDesc" border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%; max-width: 600px;">
-      <caption id="tableDesc">座席IDと生徒ID一覧および順位</caption>
-      <thead>
-        <tr><th scope="col">座席ID</th><th scope="col">生徒ID一覧</th><th scope="col">順位</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
-
-  <!-- メインスクリプト -->
   <script src="app.js"></script>
+  <script>
+    // サイドバーの開閉
+    document.getElementById("toggleSidebarBtn").addEventListener("click", () => {
+      const sidebar = document.getElementById("sidebar");
+      sidebar.classList.toggle("hidden");
+    });
+  </script>
 </body>
 </html>
