@@ -172,14 +172,17 @@ function updateRateTableWithDiff() {
     </tr>
   `;
 
-  // playerMap の rating順でソート
   const players = Object.entries(playerMap).sort((a, b) => b[1].rating - a[1].rating);
 
   players.forEach(([playerId, pdata]) => {
     const title = getTitle(pdata.rating);
     const diff = pdata.rankChange;
     const diffSymbol = diff > 0 ? `↑${diff}` : (diff < 0 ? `↓${-diff}` : "-");
+
     const tr = document.createElement("tr");
+    if (diff > 0) tr.classList.add("rank-up");
+    else if (diff < 0) tr.classList.add("rank-down");
+
     tr.innerHTML = `
       <td>${playerId}</td>
       <td>${pdata.rating}</td>
@@ -190,6 +193,7 @@ function updateRateTableWithDiff() {
     rateTable.appendChild(tr);
   });
 }
+
 
 // --- 称号判定例 ---
 function getTitle(rating) {
