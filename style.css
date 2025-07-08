@@ -238,32 +238,38 @@ tbody tr:last-child td {
   }
 }
 
-#sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  width: 0;
-  background-color: #333;
-  color: white;
-  overflow-x: hidden;
-  transition: width 0.3s ease;
-  padding-top: 2rem;
-  z-index: 9998; /* ホバーエリアより低めに */
-}
-
 /* ホバー検知用の透明エリア */
 #sidebar-hover-area {
   position: fixed;
   top: 0;
   left: 0;
+  width: 30px;      /* ホバー検知エリアの幅 */
   height: 100vh;
-  width: 30px; /* マウスが入るとサイドバー開く */
-  z-index: 9999; /* サイドバーより上に */
+  z-index: 9999;    /* サイドバーより手前 */
+  background: transparent;
+  outline: none;    /* フォーカス時の枠線は好みで調整 */
 }
 
-/* ホバー時に隣接するサイドバーを展開 */
-#sidebar-hover-area:hover + #sidebar {
+/* サイドバー初期は幅0で隠す */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100vh;
+  background-color: #333;
+  color: white;
+  overflow-x: hidden;
+  transition: width 0.3s ease, padding 0.3s ease;
+  padding-left: 0;
+  padding-top: 2rem;
+  box-sizing: border-box;
+  z-index: 9998;    /* ホバーエリアより背面 */
+}
+
+/* ホバーエリアにマウスが入ると隣接のサイドバーが展開 */
+#sidebar-hover-area:hover + #sidebar,
+#sidebar:hover {
   width: 250px;
   padding-left: 1rem;
 }
@@ -274,8 +280,18 @@ tbody tr:last-child td {
   padding: 1rem;
   color: white;
   text-decoration: none;
+  transition: background-color 0.2s ease;
 }
 
-#sidebar a:hover {
+#sidebar a:hover,
+#sidebar a:focus {
   background-color: #555;
+  outline: none;
 }
+
+/* メインのマージンは固定せず、サイドバー展開はオーバーレイ的に扱う */
+main {
+  margin-left: 0;
+  padding: 1rem;
+}
+
