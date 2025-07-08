@@ -72,16 +72,20 @@
       margin-left: 1rem;
       cursor: pointer;
     }
+    #sidebar a.active {
+      font-weight: bold;
+      color: #007bff;
+    }
   </style>
 </head>
 <body>
 
   <!-- ヘッダー -->
   <header>
-    <div>
-      <button id="toggleSidebarBtn">☰</button>
-      <h1>コード順位登録サイト</h1>
-    </div>
+   <div style="display: flex; align-items: center;">
+     <button id="toggleSidebarBtn" aria-label="メニューを開閉">☰</button>
+     <h1 style="margin-left: 1rem;">コード順位登録サイト</h1>
+   </div>
     <nav>
       <a href="https://github.com/your-repo" target="_blank" rel="noopener">GitHub</a>
       <a href="settings.html">設定</a>
